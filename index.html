@@ -392,6 +392,21 @@
     color: var(--pergamino);
   }
 
+  .tachon{
+    display:inline-block;
+    vertical-align: -0.1em;
+    margin: 0 0.18em;
+    line-height: 0;
+  }
+  .tachon-svg{ display:block; }
+  .tachon-trazo{
+    fill:none;
+    stroke: var(--pergamino);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    opacity: 0.85;
+  }
+
   .journal-page.hoja-arrancada .entry-body{
     align-items:center;
     text-align:center;
@@ -669,8 +684,8 @@
       fecha: "26 de julio, 2026",
       nivel: 7,
       parrafos: [
-        "Entré a la mansión Nott anoche. No voy a detallar cómo, por las dudas de que alguien más lea esto alguna vez. Logré sacar el libro. Casi no lo cuento: hubo mortífagos ahí, más de los que esperaba, y por poco me agarran. Me desmayé, o eso creo, porque no tengo ningún recuerdo de cómo salí de ahí. Nada. Un espacio en blanco entre el momento en que casi me atrapan y el momento en que Tabatha me encontró tirado afuera de [tachado, no se puede leer].",
-        "Después, juntos, leímos el libro. Los mortífagos querían fabricar núcleos de varitas con [varias palabras tachadas, ilegibles]. No voy a escribir acá lo que entendimos, todavía no. Necesito pensarlo más."
+        "Entré a la mansión Nott anoche. No voy a detallar cómo, por las dudas de que alguien más lea esto alguna vez. Logré sacar el libro. Casi no lo cuento: hubo mortífagos ahí, más de los que esperaba, y por poco me agarran. Me desmayé, o eso creo, porque no tengo ningún recuerdo de cómo salí de ahí. Nada. Un espacio en blanco entre el momento en que casi me atrapan y el momento en que Tabatha me encontró tirado afuera de §§2§§.",
+        "Después, juntos, leímos el libro. Los mortífagos querían fabricar núcleos de varitas con §§4§§. No voy a escribir acá lo que entendimos, todavía no. Necesito pensarlo más."
       ]
     },
     {
@@ -837,6 +852,54 @@
     entryBodyEl.style.opacity = nivel >= 9 ? '0.55' : (nivel >= 7 ? '0.78' : '1');
   }
 
+  /* ---- tachones: reemplazan texto entre corchetes por un garabato ilegible ---- */
+  function crearTachon(unidades){
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const w = 16 + unidades * 15;
+    const h = 15;
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', h);
+    svg.classList.add('tachon-svg');
+
+    const trazos = [
+      `M2,${(h*0.55).toFixed(1)} C ${(w*0.18).toFixed(1)},${(h*0.12).toFixed(1)} ${(w*0.32).toFixed(1)},${(h*0.9).toFixed(1)} ${(w*0.5).toFixed(1)},${(h*0.42).toFixed(1)} C ${(w*0.68).toFixed(1)},${(h*0.02).toFixed(1)} ${(w*0.82).toFixed(1)},${(h*0.92).toFixed(1)} ${(w-2).toFixed(1)},${(h*0.5).toFixed(1)}`,
+      `M3,${(h*0.78).toFixed(1)} C ${(w*0.22).toFixed(1)},${(h*0.98).toFixed(1)} ${(w*0.4).toFixed(1)},${(h*0.22).toFixed(1)} ${(w*0.6).toFixed(1)},${(h*0.72).toFixed(1)} C ${(w*0.75).toFixed(1)},${(h*0.98).toFixed(1)} ${(w*0.88).toFixed(1)},${(h*0.3).toFixed(1)} ${(w-3).toFixed(1)},${(h*0.62).toFixed(1)}`
+    ];
+    trazos.forEach((d, i) => {
+      const path = document.createElementNS(svgNS, 'path');
+      path.setAttribute('d', d);
+      path.classList.add('tachon-trazo');
+      if(i === 1) path.style.opacity = '0.55';
+      svg.appendChild(path);
+    });
+
+    const span = document.createElement('span');
+    span.className = 'tachon';
+    span.setAttribute('aria-label', 'texto ilegible');
+    span.appendChild(svg);
+    return span;
+  }
+
+  function construirParrafo(texto){
+    const frag = document.createDocumentFragment();
+    const regex = /§§(\d+)§§/g;
+    let lastIndex = 0;
+    let match;
+    while((match = regex.exec(texto)) !== null){
+      if(match.index > lastIndex){
+        frag.appendChild(document.createTextNode(texto.slice(lastIndex, match.index)));
+      }
+      frag.appendChild(crearTachon(parseInt(match[1], 10)));
+      lastIndex = regex.lastIndex;
+    }
+    if(lastIndex < texto.length){
+      frag.appendChild(document.createTextNode(texto.slice(lastIndex)));
+    }
+    return frag;
+  }
+
   function pintarEntrada(i){
     const entrada = entradas[i];
     journalPage.classList.toggle('hoja-arrancada', !!entrada.arrancada);
@@ -844,7 +907,7 @@
     entryBodyEl.innerHTML = '';
     entrada.parrafos.forEach(texto => {
       const p = document.createElement('p');
-      p.textContent = texto;
+      p.appendChild(construirParrafo(texto));
       entryBodyEl.appendChild(p);
     });
     pageCounter.textContent = `Página ${i+1} de ${entradas.length}`;
