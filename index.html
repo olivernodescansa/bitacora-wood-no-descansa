@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitácora de Oliver Wood</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500;1,600&family=Homemade+Apple&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bordo-centro: #3a0c14;
+    --bordo-medio: #22060c;
+    --negro-borde: #060102;
+    --negro-calido: #0b0203;
+    --pergamino: #e8dcc0;
+    --oro-viejo: #b9954f;
+    --tinta: #7a1018;
+    --tinta-oscura: #4a0910;
+    --grieta-plata: #d9dae2;
+    --grieta-sombra: #1c0508;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    background: var(--negro-borde);
+    overflow:hidden;
+  }
+
+  body{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at center, var(--bordo-centro) 0%, var(--bordo-medio) 45%, var(--negro-borde) 85%, var(--negro-calido) 100%);
+  }
+
+  /* viñeta y textura sutil */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(ellipse at center, transparent 40%, rgba(9,1,3,0.55) 100%);
+    z-index:2;
+  }
+
+  body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:0.05;
+    background-image: repeating-radial-gradient(circle at 20% 30%, #fff 0, transparent 1px, transparent 3px);
+    z-index:1;
+  }
+
+  .stage{
+    position:relative;
+    z-index:3;
+    width:100vw;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap: clamp(1.4rem, 4vh, 2.6rem);
+    padding: 5vh 5vw;
+  }
+
+  .title-block{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap: clamp(0.8rem, 3vh, 1.8rem);
+    width:100%;
+  }
+
+  /* ---------- TEXTO 1: Estrategias de Quidditch ---------- */
+  .strike-wrap{
+    position:relative;
+    display:inline-block;
+    opacity:0;
+    animation: aparecer1 0.9s ease-out forwards;
+  }
+
+  @keyframes aparecer1{
+    0%{ opacity:0; transform: translateY(8px); }
+    100%{ opacity:1; transform: translateY(0); }
+  }
+
+  .text1{
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight:500;
+    letter-spacing: 0.04em;
+    font-size: clamp(0.85rem, 4.6vw, 2.6rem);
+    color: var(--pergamino);
+    text-shadow: 0 0 18px rgba(185,149,79,0.25);
+    white-space: nowrap;
+    max-width: 92vw;
+    display: inline-block;
+  }
+
+  .scribble-svg{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-55%);
+    width:112%;
+    height:220%;
+    overflow:visible;
+    pointer-events:none;
+  }
+
+  .scribble-path{
+    fill:none;
+    stroke: var(--tinta);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: url(#tinta-aspera);
+  }
+
+  .scribble-1{
+    stroke-width:5.5;
+    stroke-dasharray: 620;
+    stroke-dashoffset: 620;
+    opacity:0.95;
+    animation: trazo1 0.28s cubic-bezier(.55,0,.85,.35) 0.95s forwards;
+  }
+
+  .scribble-2{
+    stroke-width:3.5;
+    stroke: var(--tinta-oscura);
+    stroke-dasharray: 560;
+    stroke-dashoffset: 560;
+    opacity:0.85;
+    animation: trazo2 0.22s cubic-bezier(.6,0,.9,.3) 1.12s forwards;
+  }
+
+  @keyframes trazo1{
+    to{ stroke-dashoffset:0; }
+  }
+  @keyframes trazo2{
+    to{ stroke-dashoffset:0; }
+  }
+
+  .strike-wrap.impacto{
+    animation: aparecer1 0.9s ease-out forwards, golpe 0.35s ease-out 0.95s;
+  }
+
+  @keyframes golpe{
+    0%{ transform: translate(0,0) rotate(0deg); }
+    20%{ transform: translate(-3px,1px) rotate(-0.6deg); }
+    40%{ transform: translate(3px,-1px) rotate(0.7deg); }
+    60%{ transform: translate(-2px,0) rotate(-0.4deg); }
+    80%{ transform: translate(1px,1px) rotate(0.3deg); }
+    100%{ transform: translate(0,0) rotate(0deg); }
+  }
+
+  .strike-wrap.desvanecido .text1{
+    animation: desvanecer 0.7s ease-in 1.5s forwards;
+  }
+  .strike-wrap.desvanecido .scribble-svg{
+    animation: desvanecer 0.7s ease-in 1.5s forwards;
+  }
+
+  @keyframes desvanecer{
+    to{ opacity:0.28; filter: blur(0.3px); }
+  }
+
+  /* ---------- TEXTO 2: Bitácora de Oliver Wood ---------- */
+  .text2{
+    font-family:'Homemade Apple', cursive;
+    font-weight:400;
+    color: var(--oro-viejo);
+    font-size: clamp(1.4rem, 8vw, 4.4rem);
+    line-height:1.3;
+    text-shadow: 0 0 22px rgba(185,149,79,0.3);
+    margin:0;
+    max-width: 88vw;
+    word-break: keep-all;
+    overflow-wrap: normal;
+    -webkit-hyphens: none;
+    hyphens: none;
+  }
+
+  .word{
+    display: inline-block;
+    white-space: nowrap;
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+
+  .letter{
+    display:inline-block;
+    opacity:0;
+    white-space:pre;
+    transform: translateY(var(--ty)) rotate(var(--rot));
+    animation:
+      revelar 0.45s ease-out var(--delay) forwards,
+      tiemble var(--tdur) ease-in-out var(--tdelay) infinite;
+  }
+
+  @keyframes revelar{
+    0%{ opacity:0; transform: translateY(calc(var(--ty) - 12px)) rotate(calc(var(--rot) - 5deg)); }
+    100%{ opacity:1; transform: translateY(var(--ty)) rotate(var(--rot)); }
+  }
+
+  @keyframes tiemble{
+    0%, 100%{ transform: translateY(var(--ty)) rotate(var(--rot)); }
+    25%{ transform: translateY(calc(var(--ty) - 1px)) rotate(calc(var(--rot) - 0.5deg)); }
+    50%{ transform: translateY(calc(var(--ty) + 1.4px)) rotate(calc(var(--rot) + 0.6deg)); }
+    75%{ transform: translateY(calc(var(--ty) + 0.6px)) rotate(calc(var(--rot) - 0.4deg)); }
+  }
+
+  /* ---------- BOTON ---------- */
+  .read-btn{
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 2.2vw, 1.3rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--pergamino);
+    background: transparent;
+    border: 1px solid var(--oro-viejo);
+    padding: 0.75em 2.1em;
+    border-radius: 2px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:0.6em;
+    opacity:0;
+    transform: translateY(10px);
+    pointer-events:none;
+    transition: border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  }
+
+  .read-btn.visible{
+    animation: entrarBoton 0.8s ease-out forwards;
+    pointer-events:auto;
+  }
+
+  @keyframes entrarBoton{
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .read-btn:hover{
+    background: rgba(185,149,79,0.08);
+    border-color: var(--pergamino);
+    box-shadow: 0 0 20px rgba(185,149,79,0.25);
+  }
+
+  .read-btn .flecha{
+    display:inline-block;
+    transition: transform 0.3s ease;
+    font-style: normal;
+  }
+
+  .read-btn:hover .flecha{
+    transform: translateX(5px);
+  }
+
+  @media (max-width: 420px){
+    .stage{
+      gap: clamp(1rem, 3.5vh, 1.8rem);
+      padding: 4vh 6vw;
+    }
+    .title-block{
+      gap: clamp(0.6rem, 2.2vh, 1.2rem);
+    }
+    .read-btn{
+      padding: 0.65em 1.7em;
+      letter-spacing: 0.08em;
+    }
+  }
+
+  @media (max-width: 360px){
+    .text1{
+      font-size: clamp(0.72rem, 4vw, 1.3rem);
+    }
+    .text2{
+      font-size: clamp(1.15rem, 8vw, 2rem);
+    }
+  }
+
+  /* =========================================================
+     PANTALLA 1: portada — transición de salida
+  ========================================================= */
+  #screenIntro{
+    transition: opacity 0.5s ease;
+  }
+  #screenIntro.fundido{
+    opacity:0;
+    pointer-events:none;
+  }
+
+  /* =========================================================
+     PANTALLA 2: lector de la bitácora
+  ========================================================= */
+  #screenReader{
+    position:fixed;
+    inset:0;
+    z-index:3;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    transition: opacity 0.6s ease;
+    padding: 4vh 4vw;
+    --nivel: 0;
+    background:
+      radial-gradient(ellipse at center,
+        color-mix(in srgb, var(--bordo-centro) calc(100% - var(--nivel) * 8%), var(--negro-calido) calc(var(--nivel) * 8%)) 0%,
+        color-mix(in srgb, var(--bordo-medio) calc(100% - var(--nivel) * 8%), var(--negro-calido) calc(var(--nivel) * 8%)) 45%,
+        var(--negro-borde) 85%, var(--negro-calido) 100%);
+    transition: opacity 0.6s ease, background 1s ease;
+  }
+  #screenReader.abierto{ display:flex; }
+  #screenReader.visible{ opacity:1; }
+
+  .page-counter{
+    position:fixed;
+    top: max(1.2rem, env(safe-area-inset-top));
+    right: 1.4rem;
+    z-index:6;
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    color: rgba(232,220,192,0.4);
+    pointer-events:none;
+  }
+
+  .journal-page{
+    position:relative;
+    z-index:3;
+    width:min(92vw, 680px);
+    max-height:80vh;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap: clamp(1.1rem, 3vh, 1.6rem);
+    text-align:left;
+    padding: clamp(1.7rem, 4.5vw, 3rem) clamp(1.5rem, 4.5vw, 2.8rem);
+    background: linear-gradient(180deg, rgba(24,5,8,0.4), rgba(6,1,2,0.6));
+    border: 1px solid rgba(185,149,79,0.16);
+    border-radius: 2px;
+    box-shadow: 0 0 46px rgba(0,0,0,0.5) inset, 0 20px 60px rgba(0,0,0,0.55);
+    opacity:1;
+    transform: translateY(0);
+    transition: opacity 0.4s ease, transform 0.4s ease, filter 0.9s ease;
+  }
+  .journal-page.transicion{
+    opacity:0;
+    transform: translateY(-10px);
+  }
+  .journal-page::-webkit-scrollbar{ width:6px; }
+  .journal-page::-webkit-scrollbar-thumb{ background: rgba(185,149,79,0.25); border-radius:3px; }
+
+  .entry-date{
+    margin:0;
+    font-family:'Homemade Apple', cursive;
+    font-size: clamp(1.5rem, 4.4vw, 2.2rem);
+    color: var(--oro-viejo);
+    text-shadow: 0 0 14px rgba(185,149,79,0.22);
+  }
+
+  .entry-body{
+    display:flex;
+    flex-direction:column;
+    gap: 1em;
+    transition: opacity 0.9s ease, filter 0.9s ease;
+  }
+
+  .entry-body p{
+    margin:0;
+    font-family:'Cormorant Garamond', serif;
+    font-weight:500;
+    font-size: clamp(1rem, 2.1vw, 1.18rem);
+    line-height:1.75;
+    color: var(--pergamino);
+  }
+
+  .journal-page.hoja-arrancada .entry-body{
+    align-items:center;
+    text-align:center;
+  }
+  .journal-page.hoja-arrancada .entry-body p{
+    font-style: italic;
+    color: rgba(232,220,192,0.55);
+    letter-spacing: 0.03em;
+  }
+  .journal-page.hoja-arrancada .entry-date{
+    text-align:center;
+    color: rgba(185,149,79,0.45);
+  }
+
+  .nav-btn{
+    align-self:center;
+    margin-top: 0.4rem;
+  }
+
+  /* =========================================================
+     GRIETAS DE ESPEJO ROTO
+  ========================================================= */
+  #darkOverlay{
+    position:fixed;
+    inset:0;
+    z-index:4;
+    pointer-events:none;
+    opacity:0;
+    background: radial-gradient(circle at 50% 50%, transparent 15%, rgba(9,1,3,0.88) 100%);
+    transition: opacity 1.1s ease;
+  }
+
+  #crackOverlay{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:5;
+    pointer-events:none;
+  }
+
+  .crack-seg{
+    stroke: var(--grieta-plata);
+    stroke-linecap: round;
+    opacity:0;
+    filter:
+      drop-shadow(0 0 3px rgba(217,218,226,0.55))
+      drop-shadow(0 0 1px var(--grieta-sombra));
+    transition: opacity 0.9s ease;
+  }
+
+  .crack-shard{
+    fill: var(--negro-calido);
+    stroke: rgba(217,218,226,0.28);
+    stroke-width: 1;
+    opacity:0;
+    transition: opacity 1.3s ease;
+  }
+
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <filter id="tinta-aspera" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="4"/>
+  </filter>
+</svg>
+
+<div class="stage" id="screenIntro">
+  <div class="title-block">
+    <div class="strike-wrap" id="strikeWrap">
+      <span class="text1">Estrategias de Quidditch</span>
+      <svg class="scribble-svg" viewBox="0 0 400 90" preserveAspectRatio="none">
+        <path class="scribble-path scribble-1" d="M8,48 C60,18 120,62 180,30 C240,4 300,58 392,40" />
+        <path class="scribble-path scribble-2" d="M14,58 C90,66 160,20 230,50 C290,72 340,26 386,52" />
+      </svg>
+    </div>
+
+    <h1 class="text2" id="text2"></h1>
+  </div>
+
+  <button class="read-btn" id="readBtn">
+    <span>Leer</span><span class="flecha">&#8594;</span>
+  </button>
+</div>
+
+<div id="screenReader">
+  <div id="darkOverlay"></div>
+  <svg id="crackOverlay" preserveAspectRatio="none"></svg>
+
+  <span class="page-counter" id="pageCounter"></span>
+
+  <div class="journal-page" id="journalPage">
+    <h2 class="entry-date" id="entryDate"></h2>
+    <div class="entry-body" id="entryBody"></div>
+    <button class="read-btn visible nav-btn" id="navBtn">
+      <span>Ver página siguiente</span><span class="flecha">&#8594;</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  const texto2 = "Bitácora de Oliver Wood";
+  const contenedor = document.getElementById('text2');
+  const strikeWrap = document.getElementById('strikeWrap');
+  const readBtn = document.getElementById('readBtn');
+
+  // delays base (ms), en sintonía con las animaciones CSS del texto 1
+  const inicioEscritura = 1550; // cuando empieza a "escribirse" el texto 2
+  const pasoEntreLetras = 65;
+
+  let letras = [];
+  let i = 0;
+  const palabras = texto2.split(' ');
+
+  palabras.forEach((palabra, pIdx) => {
+    // cada palabra se envuelve en un span "sellado" (nowrap) para que el
+    // navegador solo pueda saltar de línea ENTRE palabras, nunca dentro de una
+    const wordWrap = document.createElement('span');
+    wordWrap.classList.add('word');
+
+    [...palabra].forEach((ch) => {
+      const span = document.createElement('span');
+      span.textContent = ch;
+      span.classList.add('letter');
+
+      const rot = (Math.random() * 7 - 3.5).toFixed(2) + 'deg';
+      const ty = (Math.random() * 11 - 5.5).toFixed(1) + 'px';
+      const delay = (inicioEscritura + i * pasoEntreLetras) + 'ms';
+      const tdur = (2.4 + Math.random() * 1.6).toFixed(2) + 's';
+      const tdelay = (inicioEscritura + i * pasoEntreLetras + 450) + 'ms';
+
+      span.style.setProperty('--rot', rot);
+      span.style.setProperty('--ty', ty);
+      span.style.setProperty('--delay', delay);
+      span.style.setProperty('--tdur', tdur);
+      span.style.setProperty('--tdelay', tdelay);
+
+      wordWrap.appendChild(span);
+      letras.push(span);
+      i++;
+    });
+
+    contenedor.appendChild(wordWrap);
+
+    // espacio real entre palabras (aquí sí puede saltar la línea)
+    if (pIdx < palabras.length - 1) {
+      contenedor.appendChild(document.createTextNode(' '));
+      i++;
+    }
+  });
+
+  // disparar impacto y desvanecido del texto 1
+  requestAnimationFrame(() => {
+    strikeWrap.classList.add('impacto');
+    setTimeout(() => strikeWrap.classList.add('desvanecido'), 10);
+  });
+
+  // mostrar boton cuando termina la ultima letra
+  const tiempoTotal = inicioEscritura + (texto2.length - 1) * pasoEntreLetras + 450 + 400;
+  setTimeout(() => {
+    readBtn.classList.add('visible');
+  }, tiempoTotal);
+
+  readBtn.addEventListener('click', () => {
+    abrirLector();
+  });
+
+  /* =========================================================
+     LECTOR DE LA BITÁCORA
+  ========================================================= */
+
+  const NIVEL_MAX = 10;
+
+  const entradas = [
+    {
+      fecha: "12 de abril, 2026",
+      nivel: 0,
+      parrafos: [
+        "Aurelio vino de visita hoy, como todas las semanas desde que tengo memoria de tenerlas. Nueve años y nueve meses. Podría decir «casi diez» pero prefiero la cifra exacta, es más honesto.",
+        "La sesión fue rutinaria. Digo esto sin cinismo: rutinaria es la palabra correcta. Él se sienta, yo cierro los ojos, y entra. No hay dolor en eso, o no debería haberlo si hice bien mi trabajo durante la semana. Aurelio revisa los espejos uno por uno, comprobando que las salvaguardas sigan en pie. Es un chequeo, nada más. Como cuando uno revisa que las escobas del equipo estén bien encantadas antes de un partido.",
+        "Voy a describir la habitación, ya que en algún momento voy a olvidar cómo se siente escribir sobre esto con naturalidad. Es un espacio circular, sin techo visible, con espejos de distintos tamaños incrustados en las paredes como si fueran ventanas. Cada uno contiene algo: una escena, una sensación, un nombre. Algunos están apagados, otros brillan. Puedo caminar entre ellos, girarlos, esconderlos detrás de otros si hace falta. Después de casi diez años haciendo esto una vez por semana, ya no lo pienso como magia. Lo pienso como orden. Ordenar es lo único que sé hacer bien con lo que tengo adentro.",
+        "Hoy Aurelio me preguntó, como hace cada tanto, si quería hablar del prado. Le dije que sí, brevemente, aunque no hay mucho que decir que no sepa ya. Recuerdo el pasto. Recuerdo a mi tío señalando algo en el cielo, antes. Después hay un espejo que no se abre del todo: sé que ahí adentro hay mortífagos, sé que hubo legeremancia, sé que me dejaron marcas que no son físicas. Pero no sé quiénes eran. No sé qué buscaban. No sé, ni siquiera, cuánto duró. Aurelio dice que es mejor así, que ese espejo está sellado por una razón, y yo le creo, porque confío en él más de lo que confío en mis propios recuerdos.",
+        "Lo único que no necesita espejo es el quidditch. No sé explicarlo mejor que así: cuando vuelo, no tengo que ordenar nada. No hay nada que ordenar. Es el único lugar donde no siento que estoy vigilando algo. Tal vez por eso sigue generándome esto que otros llamarían pasión y yo prefiero llamar, simplemente, alivio."
+      ]
+    },
+    {
+      fecha: "3 de junio, 2026",
+      nivel: 0,
+      parrafos: [
+        "Dos copas como capitán de Gryffindor y ahora esto: Apex Legends me contrató como entrenador. Cuando llegó la carta no supe bien qué sentir, lo cual no es novedad, pero por un segundo hubo algo parecido al entusiasmo. El quidditch afuera del castillo, en serio, con jugadores que ya no son chicos aprendiendo a volar.",
+        "No voy a extenderme sobre el entusiasmo porque no duró.",
+        "En las instalaciones del club me crucé con alguien de mi pasado. No voy a poner el nombre acá. Prefiero no hacerlo, aunque suene raro viniendo de alguien que anota todo lo demás con tanto detalle. Digamos que fue suficiente para que esta semana, cuando Aurelio entró a revisar los espejos, los encontrara temblando. No es una forma de hablar: tiemblan, literal, como si algo los golpeara desde el otro lado del vidrio. Algunos estaban corridos de lugar, otros directamente no los encontraba donde deberían estar. Aurelio tardó el doble de lo normal. No dijo mucho, pero anotó algo en su libreta, cosa que no suele hacer.",
+        "Pasé varios días dándole vueltas a esto de una manera que no me es habitual. Al final decidí pedir el traslado a un puesto que no implicara estar ahí todas las semanas, algo más administrativo, ligado a la organización de torneos en vez de al entrenamiento directo. Le dije al club que era por una cuestión de tiempos. No es mentira, pero tampoco es toda la verdad."
+      ]
+    },
+    {
+      fecha: "8 de julio, 2026",
+      nivel: 0,
+      parrafos: [
+        "Hoy pasó algo que todavía no sé cómo anotar bien.",
+        "Estaba cruzando el patio cuando escuché a alguien cantando, mal, mal en el buen sentido, una canción de Oasis. Me llamó la atención porque no conozco muchos magos de sangre pura que sepan quiénes son Oasis, y menos que se sepan la letra completa de memoria. Era una chica de Slytherin, sentada sola contra la pared, con el uniforme todavía puesto a pesar de que ya habían terminado las clases.",
+        "Me acerqué. No tengo una buena explicación de por qué. No fue una decisión pensada, fue más parecido a lo que pasa con un imán: no elegís acercarte, simplemente pasa. Hablamos un rato. Se llama Tabatha. No voy a fingir que entendí lo que sentí, porque ya sabemos que eso no es algo que yo pueda hacer con claridad. Pero anoto esto igual, para el registro: supe, de alguna forma que no puedo justificar del todo, que esta persona iba a importar.",
+        "Unos días después me regaló una escoba. No una escoba cualquiera, una buena, de las que uno elige después de investigar mucho. Fue la primera vez en años que alguien se interesaba en lo que a mí me interesa, sin que yo tuviera que pedirlo o explicarlo.",
+        "Esa noche, cuando Aurelio revisó los espejos, algunos de los que tienen que ver con el quidditch estaban más luminosos que de costumbre. Los que la incluyen a ella, también."
+      ]
+    },
+    {
+      fecha: "12 de julio, 2026",
+      nivel: 0,
+      parrafos: [
+        "Tabatha y yo somos pareja. Lo escribo así, sin vueltas, porque es lo más simple que puedo decir sobre algo que no tengo forma de complicar con explicaciones que no me salen.",
+        "Fue ella la que me insistió con organizar el torneo. Yo tenía la idea dando vueltas hace tiempo, pero nunca la había puesto en marcha en serio. Ella me preguntó por qué no, y no tuve una buena respuesta, así que empecé.",
+        "Esta semana no dormí casi nada, pero por primera vez en mucho tiempo eso no se sintió como los otros insomnios. Me quedé sentado hasta tarde en la oficina de capitanes dibujando los folletos a mano, probando colores, tachando y volviendo a empezar. Los repartí por el castillo con un hechizo simple, los mandé a volar por los pasillos como si fueran hojas de otoño, algunos chocaron contra las armaduras y tuve que ir a despegarlos. Caminé por Hogwarts esta semana con una decisión que no reconozco del todo como mía, pero que tampoco quiero cuestionar.",
+        "La sesión de oclumancia de esta semana no se pudo hacer. Aurelio llegó, lo intentó, y a los pocos minutos me dijo que había demasiada energía dando vueltas como para revisar nada con propiedad. No insistió. Se fue temprano.",
+        "La verdad es que ni siquiera sentí los espejos esta semana. No es que hayan desaparecido, sé que siguen ahí. Simplemente dejaron de importarme. Todo es el torneo. Todo es quidditch."
+      ]
+    },
+    {
+      fecha: "Hoja arrancada del cuaderno",
+      nivel: 1,
+      arrancada: true,
+      parrafos: ["Hoja arrancada del cuaderno.", "Escena perdida."]
+    },
+    {
+      fecha: "Sin fecha visible — tinta corrida",
+      nivel: 2,
+      parrafos: [
+        "Últimamente me cuesta más controlar las barreras de lo habitual. No es nada grave, o eso me digo. Dolores de cabeza que aparecen sin aviso, más seguido de lo normal. Un par de veces falté a clase directamente, no porque no pudiera levantarme, sino porque sabía que no iba a poder seguir la mitad de lo que se dijera. Cuando sí voy, termino llenando los márgenes del cuaderno con anotaciones de jugadas de quidditch, formaciones, ángulos de ataque. Es lo único que me ordena la cabeza cuando algo adentro empieza a desacomodarse.",
+        "No se lo mencioné a Aurelio todavía. Voy a hacerlo la próxima sesión. Por ahora prefiero anotarlo acá, para tener registro de cuándo empezó."
+      ]
+    },
+    {
+      fecha: "14 de julio, 2026",
+      nivel: 2,
+      parrafos: [
+        "Tabatha me contó que está estudiando con Ollivander. Quiere hacer varitas, en serio, no como hobby. Cuando me lo dijo sentí algo raro, algo que no supe nombrar, ni siquiera con la práctica que tengo nombrando lo poco que logro sentir. No fue malestar. Tampoco alegría, exactamente. Algo entre las dos cosas, tal vez, o ninguna.",
+        "Me llevó a mostrarme materiales y núcleos. Habló durante casi una hora sin parar, con las manos moviéndose todo el tiempo, señalando cajas, comparando texturas. Me gusta verla así. Se nota clarísimo lo que siente, algo que a mí me cuesta tanto que verlo en otra persona me resulta, no sé, necesario. Como mirar algo que a mí me falta pero que al menos existe cerca.",
+        "Esa misma noche entré al despacho de Pociones y me llevé una caja con materiales que sabía que a ella le iban a servir. No se lo dije. No sé bien por qué lo hice tan en silencio, salvo que hacerlo en silencio se sintió correcto."
+      ]
+    },
+    {
+      fecha: "Hoja arrancada del cuaderno",
+      nivel: 3,
+      arrancada: true,
+      parrafos: ["Hoja arrancada del cuaderno.", "Escena perdida."]
+    },
+    {
+      fecha: "17 de julio, 2026",
+      nivel: 4,
+      parrafos: [
+        "Cada vez me cuesta más controlar las barreras. Duermo poco, y cuando digo poco quiero decir casi nada. Paso varias noches encerrado en la oficina de capitanes, a veces escribiendo estrategias que después ni reviso, a veces simplemente dando vueltas en círculos porque el dolor de cabeza no me deja quedarme quieto. No le encuentro un patrón todavía. Solo sé que pasa más seguido."
+      ]
+    },
+    {
+      fecha: "19 de julio, 2026",
+      nivel: 5,
+      parrafos: [
+        "Sigo sin poder controlar las barreras del todo. Hoy dos chicos de Ravenclaw me nombraron algo que aparentemente pasó la semana pasada, una conversación en las gradas, y yo no tengo ningún recuerdo de eso. Ninguno. Actué como si me acordara, asentí, dije algo genérico. No sé qué otra cosa hacer en esos momentos."
+      ]
+    },
+    {
+      fecha: "22 de julio, 2026",
+      nivel: 6,
+      parrafos: [
+        "Tabatha me contó hoy que el Señor Tenebroso la quiere reclutar. Que le llegó un contacto, indirecto, pero real. Lo dijo con una calma que a mí me costó sostener. No sé bien por qué esto me perturbó tanto, no sé nombrar la sensación, pero sé, con una certeza que no es habitual en mí, que no quiero que ella acepte.",
+        "Cuando volví a casa esa noche me puse a revisar grimorios viejos de mi padre y de mi tío, cosas que nunca había abierto porque sabía que no tenían nada que ver con quidditch y por eso nunca me habían importado. Estaba buscando algo sobre varitas, algo que sirviera para entender mejor lo que Tabatha está estudiando, tal vez para saber qué regalarle. En medio de todo eso encontré unas notas sueltas sobre mortífagos, metidas entre páginas que no correspondían.",
+        "Entre ellas había una carta. La había escrito mi tío, dirigida a un auror, contando que un libro llamado «Núcleos de Sangre», manuscrito confiscado de clase XXXXX, había sido robado por la familia Nott y estaba guardado en la mansión de ellos. Según la carta, tenía información importante sobre la fabricación de varitas.",
+        "No sé todavía qué voy a hacer con esto. Pero lo anoto."
+      ]
+    },
+    {
+      fecha: "26 de julio, 2026",
+      nivel: 7,
+      parrafos: [
+        "Entré a la mansión Nott anoche. No voy a detallar cómo, por las dudas de que alguien más lea esto alguna vez. Logré sacar el libro. Casi no lo cuento: hubo mortífagos ahí, más de los que esperaba, y por poco me agarran. Me desmayé, o eso creo, porque no tengo ningún recuerdo de cómo salí de ahí. Nada. Un espacio en blanco entre el momento en que casi me atrapan y el momento en que Tabatha me encontró tirado afuera de [tachado, no se puede leer].",
+        "Después, juntos, leímos el libro. Los mortífagos querían fabricar núcleos de varitas con [varias palabras tachadas, ilegibles]. No voy a escribir acá lo que entendimos, todavía no. Necesito pensarlo más."
+      ]
+    },
+    {
+      fecha: "27 de julio, 2026",
+      nivel: 8,
+      parrafos: [
+        "Las barreras siguen sin responder como deberían. Cada vez son más los que me nombran cosas que no recuerdo haber vivido. Me desconecto en medio de conversaciones, a veces sin darme cuenta hasta que alguien me pregunta si estoy bien. Estoy más irritable de lo que me gustaría admitir. Me peleé con varios alumnos esta semana, incluidos jugadores de mis propios equipos, por cosas que en otro momento no me hubieran movido un pelo."
+      ]
+    },
+    {
+      fecha: "28 de julio, 2026",
+      nivel: 9,
+      parrafos: [
+        "No controlo bien lo que pienso ni lo que siento. Estoy desbordado, esa es la palabra, aunque me cueste usarla sobre mí mismo. Lo que hice, entrar a esa mansión, robar ese libro, fue impulsivo, y lo sé. Nos puso en riesgo a los dos, no solo a mí. Estoy preocupado por Tabatha de una forma que no tengo cómo ordenar en un espejo, porque no encuentro cuál es el espejo correcto para esto. No sé qué hacer con lo que siento. Ni siquiera sé si lo que tengo adentro se puede llamar así."
+      ]
+    },
+    {
+      fecha: "29 de julio, 2026",
+      nivel: 10,
+      parrafos: [
+        "Discutí con Tabatha. No voy a escribir por qué, no importa ahora. La dejé sola y volví al castillo. Cuando llegué a mi cuarto me di cuenta de que el libro que habíamos sacado de la mansión Nott ya no estaba donde lo había dejado.",
+        "Até cabos rápido. Volví corriendo a la cabaña donde la había dejado.",
+        "Sus amigas estaban ahí, alrededor de ella, en el piso. Me explicaron lo que había pasado antes de que yo pudiera preguntar. Fue el maleficio asesino.",
+        "No voy a describir lo que sentí porque no hay nada que describir, y eso, escrito así, tan seco, es exactamente lo que necesito que quede registrado. No sentí nada. No porque no me importara. Sentí que si dejaba que eso entrara, no iba a poder volver a cerrar el espejo nunca más, y con lo inestables que están mis barreras hace meses, no podía arriesgarme a eso. Así que hice lo único que sé hacer bien: ordené.",
+        "Tomé todo lo que era Tabatha, cada escena, cada mirada, la escoba, la canción de Oasis, la caja de materiales robada del despacho de Pociones, y lo metí en un espejo. Uno solo. Lo puse en el fondo de la habitación, donde no lo cruzo cuando camino entre los otros, y lo sellé como Aurelio me enseñó a sellar lo que no se puede procesar.",
+        "No fue para olvidarla. Fue para poder seguir de pie.",
+        "Volví al castillo. Esa misma tarde estuve en el campo, dirigiendo una práctica, dando indicaciones sobre formaciones de ataque, como si nada. Alguien me preguntó si estaba bien.",
+        "Le dije que sí.",
+        "Es lo único que sé hacer."
+      ]
+    }
+  ];
+
+  let indiceActual = 0;
+
+  const screenIntro  = document.getElementById('screenIntro');
+  const screenReader = document.getElementById('screenReader');
+  const journalPage  = document.getElementById('journalPage');
+  const entryDateEl  = document.getElementById('entryDate');
+  const entryBodyEl  = document.getElementById('entryBody');
+  const navBtn       = document.getElementById('navBtn');
+  const pageCounter  = document.getElementById('pageCounter');
+  const darkOverlay  = document.getElementById('darkOverlay');
+
+  /* ---- generador de grietas (determinístico) ---- */
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function construirGrietas(){
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.getElementById('crackOverlay');
+    svg.innerHTML = '';
+    const W = window.innerWidth, H = window.innerHeight;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+    const rand = mulberry32(20260729);
+    const cx = W / 2, cy = H / 2;
+    const esquinas = [ {x:0,y:0}, {x:W,y:0}, {x:W,y:H}, {x:0,y:H} ];
+
+    esquinas.forEach(esquina => {
+      const ramasPorEsquina = 6;
+      for(let b=0; b<ramasPorEsquina; b++){
+        let x = esquina.x + (rand()-0.5) * W * 0.06;
+        let y = esquina.y + (rand()-0.5) * H * 0.06;
+        const anguloBase = Math.atan2(cy - esquina.y, cx - esquina.x);
+        let angulo = anguloBase + (rand()-0.5) * 0.9;
+
+        const numSegs = 6 + Math.floor(rand()*4);
+        const largoTotal = Math.min(W,H) * (0.4 + rand()*0.2);
+        const largoSeg = largoTotal / numSegs;
+
+        for(let s=0; s<numSegs; s++){
+          angulo += (rand()-0.5) * 0.5;
+          const nx = x + Math.cos(angulo) * largoSeg * (0.7 + rand()*0.6);
+          const ny = y + Math.sin(angulo) * largoSeg * (0.7 + rand()*0.6);
+
+          const t = s / (numSegs - 1);
+          const umbral = Math.max(1, Math.round(t * NIVEL_MAX));
+          const grosor = 3.1 - t * 2.2;
+
+          const linea = document.createElementNS(svgNS, 'line');
+          linea.setAttribute('x1', x.toFixed(1));
+          linea.setAttribute('y1', y.toFixed(1));
+          linea.setAttribute('x2', nx.toFixed(1));
+          linea.setAttribute('y2', ny.toFixed(1));
+          linea.setAttribute('stroke-width', grosor.toFixed(2));
+          linea.classList.add('crack-seg');
+          linea.dataset.umbral = umbral;
+          svg.appendChild(linea);
+
+          if(s >= 2 && rand() < 0.28){
+            const anguloBif = angulo + (rand()-0.5) * 1.4;
+            const largoBif = largoSeg * (0.5 + rand()*0.6);
+            const fx = nx + Math.cos(anguloBif) * largoBif;
+            const fy = ny + Math.sin(anguloBif) * largoBif;
+            const bif = document.createElementNS(svgNS, 'line');
+            bif.setAttribute('x1', nx.toFixed(1));
+            bif.setAttribute('y1', ny.toFixed(1));
+            bif.setAttribute('x2', fx.toFixed(1));
+            bif.setAttribute('y2', fy.toFixed(1));
+            bif.setAttribute('stroke-width', (grosor*0.6).toFixed(2));
+            bif.classList.add('crack-seg');
+            bif.dataset.umbral = Math.min(NIVEL_MAX, umbral + 1);
+            svg.appendChild(bif);
+          }
+          x = nx; y = ny;
+        }
+      }
+    });
+
+    // esquirlas oscuras: se suman recién en niveles altos, tapando cada vez más pantalla
+    const esquirlas = [5,6,7,8,9,10];
+    esquinas.forEach((esquina, idx) => {
+      esquirlas.forEach(nivel => {
+        const alcance = Math.min(W,H) * (0.14 + (nivel/NIVEL_MAX) * 0.55);
+        const dirx = esquina.x === 0 ? 1 : -1;
+        const diry = esquina.y === 0 ? 1 : -1;
+        const p1 = esquina;
+        const p2 = { x: esquina.x + dirx*alcance*(0.6+rand()*0.4), y: esquina.y };
+        const p3 = { x: esquina.x, y: esquina.y + diry*alcance*(0.6+rand()*0.4) };
+        const p4 = { x: esquina.x + dirx*alcance*(0.32+rand()*0.35), y: esquina.y + diry*alcance*(0.32+rand()*0.35) };
+        const poly = document.createElementNS(svgNS, 'polygon');
+        poly.setAttribute('points', `${p1.x},${p1.y} ${p2.x},${p2.y} ${p4.x},${p4.y} ${p3.x},${p3.y}`);
+        poly.classList.add('crack-shard');
+        poly.dataset.umbral = nivel;
+        poly.style.setProperty('--op', (0.18 + (nivel/NIVEL_MAX)*0.55).toFixed(2));
+        svg.appendChild(poly);
+      });
+    });
+  }
+
+  function aplicarNivel(nivel){
+    document.querySelectorAll('.crack-seg').forEach(el => {
+      const umbral = parseInt(el.dataset.umbral, 10);
+      if(umbral <= nivel){
+        const intensidad = Math.min(0.95, 0.45 + (nivel - umbral) * 0.06 + umbral * 0.03);
+        el.style.opacity = intensidad.toFixed(2);
+      } else {
+        el.style.opacity = 0;
+      }
+    });
+    document.querySelectorAll('.crack-shard').forEach(el => {
+      const umbral = parseInt(el.dataset.umbral, 10);
+      if(umbral <= nivel){
+        const base = parseFloat(el.style.getPropertyValue('--op')) || 0.4;
+        const crecimiento = Math.min(1, 0.55 + (nivel / NIVEL_MAX) * 0.6);
+        el.style.opacity = Math.min(0.92, base * crecimiento).toFixed(2);
+      } else {
+        el.style.opacity = 0;
+      }
+    });
+    darkOverlay.style.opacity = (nivel / NIVEL_MAX * 0.7).toFixed(2);
+    screenReader.style.setProperty('--nivel', nivel);
+    journalPage.style.filter =
+      `brightness(${(1 - nivel*0.045).toFixed(3)}) contrast(${(1 + nivel*0.02).toFixed(3)}) saturate(${(1 - nivel*0.05).toFixed(3)})`;
+    const desenfoque = Math.max(0, (nivel - 6) * 0.2).toFixed(2);
+    entryBodyEl.style.filter = `blur(${desenfoque}px)`;
+    entryBodyEl.style.opacity = nivel >= 9 ? '0.55' : (nivel >= 7 ? '0.78' : '1');
+  }
+
+  function pintarEntrada(i){
+    const entrada = entradas[i];
+    journalPage.classList.toggle('hoja-arrancada', !!entrada.arrancada);
+    entryDateEl.textContent = entrada.fecha;
+    entryBodyEl.innerHTML = '';
+    entrada.parrafos.forEach(texto => {
+      const p = document.createElement('p');
+      p.textContent = texto;
+      entryBodyEl.appendChild(p);
+    });
+    pageCounter.textContent = `Página ${i+1} de ${entradas.length}`;
+    aplicarNivel(entrada.nivel);
+
+    const textoSpan = navBtn.querySelector('span');
+    if(i < entradas.length - 1){
+      textoSpan.textContent = 'Ver página siguiente';
+      navBtn.onclick = () => irAPagina(i+1);
+    } else {
+      textoSpan.textContent = 'Cerrar la bitácora';
+      navBtn.onclick = () => cerrarLector();
+    }
+  }
+
+  function irAPagina(i){
+    journalPage.classList.add('transicion');
+    setTimeout(() => {
+      indiceActual = i;
+      pintarEntrada(i);
+      journalPage.scrollTop = 0;
+      requestAnimationFrame(() => journalPage.classList.remove('transicion'));
+    }, 380);
+  }
+
+  function abrirLector(){
+    construirGrietas();
+    screenIntro.classList.add('fundido');
+    screenReader.classList.add('abierto');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => screenReader.classList.add('visible'));
+    });
+    indiceActual = 0;
+    pintarEntrada(0);
+  }
+
+  function cerrarLector(){
+    screenReader.classList.remove('visible');
+    screenIntro.classList.remove('fundido');
+    setTimeout(() => {
+      screenReader.classList.remove('abierto');
+      indiceActual = 0;
+      journalPage.scrollTop = 0;
+    }, 600);
+  }
+</script>
+
+</body>
+</html>
