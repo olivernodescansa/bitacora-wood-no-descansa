@@ -466,6 +466,50 @@
     transition: opacity 1.3s ease;
   }
 
+  /* =========================================================
+     MODO BRUMA — pagina final, sin grietas, fondo oscuro
+     con niebla plateada en movimiento
+  ========================================================= */
+  body.bruma-modo{
+    background: radial-gradient(ellipse at center, #111219 0%, #08080b 50%, #020203 100%);
+  }
+
+  #screenReader.bruma-activa{
+    background: radial-gradient(ellipse at center, #14151c 0%, #0a0a0e 45%, #050506 85%, #020203 100%);
+  }
+
+  #brumaCanvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:2;
+    pointer-events:none;
+    opacity:0;
+    filter: blur(18px);
+    transition: opacity 1.8s ease;
+  }
+  #brumaCanvas.activo{ opacity:1; }
+
+  .journal-page.bruma-articulo{
+    background: linear-gradient(180deg, rgba(19,20,27,0.55), rgba(4,4,6,0.78));
+    border-color: rgba(199,203,214,0.16);
+    box-shadow: 0 0 50px rgba(0,0,0,0.6) inset, 0 20px 70px rgba(0,0,0,0.6);
+  }
+
+  .journal-page.bruma-articulo .entry-date{
+    color: var(--grieta-plata);
+    text-shadow: 0 0 16px rgba(199,203,214,0.3);
+  }
+
+  .journal-page.bruma-articulo .entry-body p{
+    color: #d7d9e2;
+  }
+
+  .journal-page.bruma-articulo .tachon-trazo{
+    stroke: #d7d9e2;
+  }
+
 </style>
 </head>
 <body>
@@ -498,6 +542,7 @@
 <div id="screenReader">
   <div id="darkOverlay"></div>
   <svg id="crackOverlay" preserveAspectRatio="none"></svg>
+  <canvas id="brumaCanvas"></canvas>
 
   <span class="page-counter" id="pageCounter"></span>
 
@@ -716,6 +761,18 @@
         "Le dije que sí.",
         "Es lo único que sé hacer."
       ]
+    },
+    {
+      fecha: "31 de julio, 2026",
+      especial: "bruma",
+      parrafos: [
+        "Sesión con Aurelio. Tardó más de lo habitual.",
+        "Me dijo que hubo un incidente. Que perdí el control en el campo, que hubo gente buscándome, que él me trajo de vuelta. No tengo registro de nada de eso. Es un espacio en blanco, como otros que ya vengo anotando desde hace semanas, solo que más grande. No le doy más vueltas de las necesarias.",
+        "Encontró varios espejos rotos, dijo. Los está arreglando. Confío en que sabe lo que hace, como siempre.",
+        "Tengo frío en el pecho a veces, sin motivo. Aparece y se va. No se lo mencioné. No parece urgente.",
+        "Mañana retomo las prácticas. Hace falta ordenar formaciones para lo que queda del calendario, ver quién puede volar y quién no después de estos días. Es lo que corresponde hacer ahora.",
+        "Nada más para anotar hoy."
+      ]
     }
   ];
 
@@ -900,6 +957,169 @@
     return frag;
   }
 
+  /* ---- bruma plateada + humo negro central: pagina final ---- */
+  let brumaCanvas = null;
+  let brumaCtx = null;
+  let brumaParticulas = [];
+  let humoLobulos = [];
+  let brumaAnimId = null;
+  let pulsoValor = 0;      // 0 = calma, sube en cada pulso y decae solo
+  let pulsoProximo = 0;    // cuadros restantes hasta el siguiente pulso
+
+  function redimensionarBruma(){
+    if(!brumaCanvas) return;
+    brumaCanvas.width = window.innerWidth;
+    brumaCanvas.height = window.innerHeight;
+  }
+
+  function iniciarBruma(){
+    if(!brumaCanvas){
+      brumaCanvas = document.getElementById('brumaCanvas');
+      brumaCtx = brumaCanvas.getContext('2d');
+    }
+    redimensionarBruma();
+
+    // bruma plateada: capas grandes y superpuestas que se funden entre si,
+    // cada una con lobulos internos para que la forma cambie sola
+    brumaParticulas = [];
+    const cantidad = 34;
+    for(let n=0; n<cantidad; n++){
+      const lobulos = [];
+      const nLob = 3;
+      for(let l=0; l<nLob; l++){
+        lobulos.push({
+          angulo: (Math.PI*2/nLob)*l + Math.random()*0.6,
+          velAngulo: (Math.random()-0.5) * 0.01,
+          dist: 10 + Math.random()*16,
+          fase: Math.random()*Math.PI*2,
+          velFase: 0.006 + Math.random()*0.01
+        });
+      }
+      brumaParticulas.push({
+        x: Math.random() * brumaCanvas.width,
+        y: Math.random() * brumaCanvas.height,
+        r: 130 + Math.random() * 220,
+        vx: (Math.random() - 0.5) * 0.1,
+        vy: (Math.random() - 0.5) * 0.05 - 0.018,
+        op: 0.06 + Math.random() * 0.1,
+        fase: Math.random() * Math.PI * 2,
+        velFase: 0.0003 + Math.random() * 0.0005,
+        lobulos
+      });
+    }
+
+    // humo negro central: lobulos que orbitan muy cerca del centro,
+    // se superponen y por eso el centro exacto queda mas oscuro
+    humoLobulos = [];
+    const nHumo = 9;
+    for(let h=0; h<nHumo; h++){
+      humoLobulos.push({
+        anguloBase: (Math.PI*2/nHumo) * h,
+        velAngulo: 0.09 + Math.random()*0.16,
+        sentido: Math.random() < 0.5 ? 1 : -1,
+        radioOrbita: 14 + Math.random()*20,
+        radioBlob: 60 + Math.random()*90,
+        fase: Math.random()*Math.PI*2,
+        velFase: 0.01 + Math.random()*0.018
+      });
+    }
+    pulsoValor = 0;
+    pulsoProximo = 70 + Math.random()*110;
+
+    brumaCanvas.classList.add('activo');
+    if(brumaAnimId) cancelAnimationFrame(brumaAnimId);
+    animarBruma();
+  }
+
+  function animarBruma(){
+    if(!brumaCanvas || !brumaCtx) return;
+    const W = brumaCanvas.width, H = brumaCanvas.height;
+    brumaCtx.clearRect(0, 0, W, H);
+
+    /* --- particulas plateadas, cambiando de forma --- */
+    brumaCtx.globalCompositeOperation = 'lighter';
+    brumaParticulas.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.fase += p.velFase;
+      if(p.x < -p.r) p.x = W + p.r;
+      if(p.x > W + p.r) p.x = -p.r;
+      if(p.y < -p.r) p.y = H + p.r;
+      if(p.y > H + p.r) p.y = -p.r;
+
+      const opBase = p.op * (0.6 + 0.4 * Math.sin(p.fase));
+
+      p.lobulos.forEach(lob => {
+        lob.angulo += lob.velAngulo;
+        lob.fase += lob.velFase;
+        const desplazamiento = lob.dist * (0.7 + 0.3 * Math.sin(lob.fase));
+        const cx = p.x + Math.cos(lob.angulo) * desplazamiento;
+        const cy = p.y + Math.sin(lob.angulo) * desplazamiento;
+        const radioLob = p.r * (0.55 + 0.25 * Math.sin(lob.fase * 1.3));
+        const grad = brumaCtx.createRadialGradient(cx, cy, 0, cx, cy, radioLob);
+        grad.addColorStop(0, `rgba(228,231,240,${(opBase*0.8).toFixed(3)})`);
+        grad.addColorStop(0.6, `rgba(228,231,240,${(opBase*0.35).toFixed(3)})`);
+        grad.addColorStop(1, 'rgba(228,231,240,0)');
+        brumaCtx.fillStyle = grad;
+        brumaCtx.beginPath();
+        brumaCtx.arc(cx, cy, radioLob, 0, Math.PI * 2);
+        brumaCtx.fill();
+      });
+    });
+
+    /* --- pulso: alterna calma y arranques violentos, como un latido --- */
+    pulsoProximo--;
+    if(pulsoProximo <= 0){
+      pulsoValor = 0.7 + Math.random() * 0.9;
+      pulsoProximo = 50 + Math.random() * 140;
+    }
+    pulsoValor *= 0.965;
+    const intensidad = pulsoValor;
+    const velocidadExtra = 1 + intensidad * 3.2;
+    const jitter = intensidad * 9;
+
+    /* --- humo negro central: se retuerce, mas oscuro hacia el centro --- */
+    const cx0 = W / 2, cy0 = H / 2;
+    brumaCtx.globalCompositeOperation = 'source-over';
+    humoLobulos.forEach(h => {
+      h.anguloBase += h.velAngulo * h.sentido * velocidadExtra * 0.02;
+      h.fase += h.velFase * (1 + intensidad * 1.5);
+      const respiro = 0.65 + 0.35 * Math.sin(h.fase);
+      const orbita = h.radioOrbita * respiro * (1 + intensidad * 0.9);
+      const tembor = intensidad > 0.03
+        ? { x:(Math.random()-0.5)*jitter, y:(Math.random()-0.5)*jitter }
+        : { x:0, y:0 };
+      const hx = cx0 + Math.cos(h.anguloBase) * orbita + tembor.x;
+      const hy = cy0 + Math.sin(h.anguloBase) * orbita + tembor.y;
+      const radioBlob = h.radioBlob * (0.8 + 0.3 * Math.sin(h.fase * 0.7)) * (1 + intensidad * 0.35);
+      const grad = brumaCtx.createRadialGradient(hx, hy, 0, hx, hy, radioBlob);
+      grad.addColorStop(0, `rgba(2,2,3,${(0.5 + intensidad*0.25).toFixed(3)})`);
+      grad.addColorStop(0.55, `rgba(2,2,3,${(0.22 + intensidad*0.12).toFixed(3)})`);
+      grad.addColorStop(1, 'rgba(2,2,3,0)');
+      brumaCtx.fillStyle = grad;
+      brumaCtx.beginPath();
+      brumaCtx.arc(hx, hy, radioBlob, 0, Math.PI * 2);
+      brumaCtx.fill();
+    });
+
+    brumaAnimId = requestAnimationFrame(animarBruma);
+  }
+
+  function detenerBruma(){
+    if(brumaAnimId){
+      cancelAnimationFrame(brumaAnimId);
+      brumaAnimId = null;
+    }
+    if(brumaCanvas){
+      brumaCanvas.classList.remove('activo');
+      if(brumaCtx) brumaCtx.clearRect(0, 0, brumaCanvas.width, brumaCanvas.height);
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    if(brumaCanvas && brumaCanvas.classList.contains('activo')) redimensionarBruma();
+  });
+
   function pintarEntrada(i){
     const entrada = entradas[i];
     journalPage.classList.toggle('hoja-arrancada', !!entrada.arrancada);
@@ -911,7 +1131,22 @@
       entryBodyEl.appendChild(p);
     });
     pageCounter.textContent = `Página ${i+1} de ${entradas.length}`;
-    aplicarNivel(entrada.nivel);
+
+    if(entrada.especial === 'bruma'){
+      aplicarNivel(0);
+      document.querySelectorAll('.crack-seg, .crack-shard').forEach(el => { el.style.opacity = 0; });
+      darkOverlay.style.opacity = 0;
+      document.body.classList.add('bruma-modo');
+      screenReader.classList.add('bruma-activa');
+      journalPage.classList.add('bruma-articulo');
+      iniciarBruma();
+    } else {
+      document.body.classList.remove('bruma-modo');
+      screenReader.classList.remove('bruma-activa');
+      journalPage.classList.remove('bruma-articulo');
+      detenerBruma();
+      aplicarNivel(entrada.nivel);
+    }
 
     const textoSpan = navBtn.querySelector('span');
     if(i < entradas.length - 1){
@@ -947,6 +1182,10 @@
   function cerrarLector(){
     screenReader.classList.remove('visible');
     screenIntro.classList.remove('fundido');
+    detenerBruma();
+    document.body.classList.remove('bruma-modo');
+    screenReader.classList.remove('bruma-activa');
+    journalPage.classList.remove('bruma-articulo');
     setTimeout(() => {
       screenReader.classList.remove('abierto');
       indiceActual = 0;
