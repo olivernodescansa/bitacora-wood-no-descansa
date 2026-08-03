@@ -225,6 +225,14 @@
   }
 
   /* ---------- BOTON ---------- */
+  .intro-btns{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap: clamp(0.8rem, 2vw, 1.4rem);
+  }
+
   .read-btn{
     font-family:'Cormorant Garamond', serif;
     font-style: italic;
@@ -491,6 +499,21 @@
   }
   #brumaCanvas.activo{ opacity:1; }
 
+  #brumaBlackSVG{
+    position:fixed;
+    top:50%;
+    left:50%;
+    width:min(58vw,58vh);
+    height:min(58vw,58vh);
+    margin-top:calc(min(58vw,58vh) / -2);
+    margin-left:calc(min(58vw,58vh) / -2);
+    z-index:2;
+    pointer-events:none;
+    opacity:0;
+    transition: opacity 1.8s ease;
+  }
+  #brumaBlackSVG.activo{ opacity:1; }
+
   .journal-page.bruma-articulo{
     background: linear-gradient(180deg, rgba(19,20,27,0.55), rgba(4,4,6,0.78));
     border-color: rgba(199,203,214,0.16);
@@ -534,15 +557,36 @@
     <h1 class="text2" id="text2"></h1>
   </div>
 
-  <button class="read-btn" id="readBtn">
-    <span>Leer</span><span class="flecha">&#8594;</span>
-  </button>
+  <div class="intro-btns">
+    <button class="read-btn" id="readBtn">
+      <span>Leer</span><span class="flecha">&#8594;</span>
+    </button>
+    <button class="read-btn" id="lastPageBtn">
+      <span>Ir a la última página</span><span class="flecha">&#8594;</span>
+    </button>
+  </div>
 </div>
 
 <div id="screenReader">
   <div id="darkOverlay"></div>
   <svg id="crackOverlay" preserveAspectRatio="none"></svg>
   <canvas id="brumaCanvas"></canvas>
+  <svg id="brumaBlackSVG" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <filter id="turbBlackJournal" x="-60%" y="-60%" width="220%" height="220%">
+        <feTurbulence type="turbulence" baseFrequency="0.02 0.03" numOctaves="2" seed="19" result="noiseJournal">
+          <animate attributeName="baseFrequency" dur="0.9s" values="0.02 0.03;0.05 0.01;0.015 0.04;0.02 0.03" repeatCount="indefinite"/>
+        </feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noiseJournal" scale="46"/>
+      </filter>
+    </defs>
+    <g id="journalBlackGroup">
+      <circle id="journalBlackMass" cx="200" cy="200" r="92" fill="#030105" filter="url(#turbBlackJournal)">
+        <animate attributeName="r" values="92;104;88;98;92" dur="3.6s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="200" cy="200" r="92" fill="none" stroke="#4a0910" stroke-width="0.6" opacity="0.35" filter="url(#turbBlackJournal)"/>
+    </g>
+  </svg>
 
   <span class="page-counter" id="pageCounter"></span>
 
@@ -560,6 +604,7 @@
   const contenedor = document.getElementById('text2');
   const strikeWrap = document.getElementById('strikeWrap');
   const readBtn = document.getElementById('readBtn');
+  const lastPageBtn = document.getElementById('lastPageBtn');
 
   // delays base (ms), en sintonía con las animaciones CSS del texto 1
   const inicioEscritura = 1550; // cuando empieza a "escribirse" el texto 2
@@ -616,10 +661,15 @@
   const tiempoTotal = inicioEscritura + (texto2.length - 1) * pasoEntreLetras + 450 + 400;
   setTimeout(() => {
     readBtn.classList.add('visible');
+    lastPageBtn.classList.add('visible');
   }, tiempoTotal);
 
   readBtn.addEventListener('click', () => {
     abrirLector();
+  });
+
+  lastPageBtn.addEventListener('click', () => {
+    abrirLector(entradas.length - 1);
   });
 
   /* =========================================================
@@ -748,19 +798,10 @@
       ]
     },
     {
-      fecha: "29 de julio, 2026",
+      fecha: "Hoja arrancada del cuaderno",
       nivel: 10,
-      parrafos: [
-        "Discutí con Tabatha. No voy a escribir por qué, no importa ahora. La dejé sola y volví al castillo. Cuando llegué a mi cuarto me di cuenta de que el libro que habíamos sacado de la mansión Nott ya no estaba donde lo había dejado.",
-        "Até cabos rápido. Volví corriendo a la cabaña donde la había dejado.",
-        "Sus amigas estaban ahí, alrededor de ella, en el piso. Me explicaron lo que había pasado antes de que yo pudiera preguntar. Fue el maleficio asesino.",
-        "No voy a describir lo que sentí porque no hay nada que describir, y eso, escrito así, tan seco, es exactamente lo que necesito que quede registrado. No sentí nada. No porque no me importara. Sentí que si dejaba que eso entrara, no iba a poder volver a cerrar el espejo nunca más, y con lo inestables que están mis barreras hace meses, no podía arriesgarme a eso. Así que hice lo único que sé hacer bien: ordené.",
-        "Tomé todo lo que era Tabatha, cada escena, cada mirada, la escoba, la canción de Oasis, la caja de materiales robada del despacho de Pociones, y lo metí en un espejo. Uno solo. Lo puse en el fondo de la habitación, donde no lo cruzo cuando camino entre los otros, y lo sellé como Aurelio me enseñó a sellar lo que no se puede procesar.",
-        "No fue para olvidarla. Fue para poder seguir de pie.",
-        "Volví al castillo. Esa misma tarde estuve en el campo, dirigiendo una práctica, dando indicaciones sobre formaciones de ataque, como si nada. Alguien me preguntó si estaba bien.",
-        "Le dije que sí.",
-        "Es lo único que sé hacer."
-      ]
+      arrancada: true,
+      parrafos: ["Hoja arrancada del cuaderno.", "Escena perdida."]
     },
     {
       fecha: "31 de julio, 2026",
@@ -772,6 +813,18 @@
         "Tengo frío en el pecho a veces, sin motivo. Aparece y se va. No se lo mencioné. No parece urgente.",
         "Mañana retomo las prácticas. Hace falta ordenar formaciones para lo que queda del calendario, ver quién puede volar y quién no después de estos días. Es lo que corresponde hacer ahora.",
         "Nada más para anotar hoy."
+      ]
+    },
+    {
+      fecha: "2 de agosto",
+      especial: "bruma",
+      parrafos: [
+        "Desde ayer no puedo dejar de pensar en eso.",
+        "Salí distraído del cuarto de Jeon con el frasco de jazmines (que le iba a regalar a §§1§§) en la mano, pensando que Aurora había vuelto antes de lo previsto. Error mío: no era mi hermana la que estaba sentada ahí mirando el cielo, sino una rubia que jamás había visto en el castillo. Le dije que la había confundido y, para peor, la primera vez le erré el nombre. Tabatha. Con hache. Me lo repitió como tres veces distintas hasta que se cansó y me dijo que la llame como quiera.",
+        "Se hizo llamar amiga de Riddle, me dijo que tenía un permiso firmado por Snape para andar en la torre. Los slytherin a veces creen que los demás somos idiotas... pero como me dieron intriga sus motivos, le hice pensar que le creí. Terminé contándole que la torre es de mi hermana y que es mi lugar favorito del castillo. Ella se rió de mi ego... Imaginenlo, un slytherin riendose del ego de alguien. Debería pedir un deseo.",
+        "Hablamos de todo un poco: de los jazmines que le robé al invernadero tres, de Herbología, de una canción muggle que puso — Olivia Rodrigo, dijo — y de esa constelación rara que tiene forma de guitarra y corazón, la que ni Aurora tiene registrada en ningún catálogo. Le mostré el reporte que armé sobre eso. Ninguna explicación lógica. Solo la vemos ella y yo. «Es producto de un hechizo», escribí, y no me saco esa frase de la cabeza. Seguiré investigando sobre esto.",
+        "Cuando escuchamos los pasos de Aurora acercándose, entré en pánico — Tabatha no tenía nota para estar ahí y yo tampoco tenía forma de explicar por qué estaba con ella. Terminé haciéndole un encantamiento burbuja y tirándola por la ventana. Gritó como loca pero funcionó.",
+        "Anotación para mí mismo: la próxima vez, avisar antes de tirar gente por la ventana. Y averiguar quién es en serio esta Tabatha Avery, porque algo me dice que no la vi por última vez."
       ]
     }
   ];
@@ -961,10 +1014,12 @@
   let brumaCanvas = null;
   let brumaCtx = null;
   let brumaParticulas = [];
-  let humoLobulos = [];
   let brumaAnimId = null;
   let pulsoValor = 0;      // 0 = calma, sube en cada pulso y decae solo
   let pulsoProximo = 0;    // cuadros restantes hasta el siguiente pulso
+
+  let brumaBlackSVG = null;
+  let journalBlackGroupEl = null;
 
   function redimensionarBruma(){
     if(!brumaCanvas) return;
@@ -976,6 +1031,10 @@
     if(!brumaCanvas){
       brumaCanvas = document.getElementById('brumaCanvas');
       brumaCtx = brumaCanvas.getContext('2d');
+    }
+    if(!brumaBlackSVG){
+      brumaBlackSVG = document.getElementById('brumaBlackSVG');
+      journalBlackGroupEl = document.getElementById('journalBlackGroup');
     }
     redimensionarBruma();
 
@@ -1008,25 +1067,11 @@
       });
     }
 
-    // humo negro central: lobulos que orbitan muy cerca del centro,
-    // se superponen y por eso el centro exacto queda mas oscuro
-    humoLobulos = [];
-    const nHumo = 9;
-    for(let h=0; h<nHumo; h++){
-      humoLobulos.push({
-        anguloBase: (Math.PI*2/nHumo) * h,
-        velAngulo: 0.09 + Math.random()*0.16,
-        sentido: Math.random() < 0.5 ? 1 : -1,
-        radioOrbita: 14 + Math.random()*20,
-        radioBlob: 60 + Math.random()*90,
-        fase: Math.random()*Math.PI*2,
-        velFase: 0.01 + Math.random()*0.018
-      });
-    }
     pulsoValor = 0;
     pulsoProximo = 70 + Math.random()*110;
 
     brumaCanvas.classList.add('activo');
+    if(brumaBlackSVG) brumaBlackSVG.classList.add('activo');
     if(brumaAnimId) cancelAnimationFrame(brumaAnimId);
     animarBruma();
   }
@@ -1075,32 +1120,14 @@
     }
     pulsoValor *= 0.965;
     const intensidad = pulsoValor;
-    const velocidadExtra = 1 + intensidad * 3.2;
-    const jitter = intensidad * 9;
 
-    /* --- humo negro central: se retuerce, mas oscuro hacia el centro --- */
-    const cx0 = W / 2, cy0 = H / 2;
-    brumaCtx.globalCompositeOperation = 'source-over';
-    humoLobulos.forEach(h => {
-      h.anguloBase += h.velAngulo * h.sentido * velocidadExtra * 0.02;
-      h.fase += h.velFase * (1 + intensidad * 1.5);
-      const respiro = 0.65 + 0.35 * Math.sin(h.fase);
-      const orbita = h.radioOrbita * respiro * (1 + intensidad * 0.9);
-      const tembor = intensidad > 0.03
-        ? { x:(Math.random()-0.5)*jitter, y:(Math.random()-0.5)*jitter }
-        : { x:0, y:0 };
-      const hx = cx0 + Math.cos(h.anguloBase) * orbita + tembor.x;
-      const hy = cy0 + Math.sin(h.anguloBase) * orbita + tembor.y;
-      const radioBlob = h.radioBlob * (0.8 + 0.3 * Math.sin(h.fase * 0.7)) * (1 + intensidad * 0.35);
-      const grad = brumaCtx.createRadialGradient(hx, hy, 0, hx, hy, radioBlob);
-      grad.addColorStop(0, `rgba(2,2,3,${(0.5 + intensidad*0.25).toFixed(3)})`);
-      grad.addColorStop(0.55, `rgba(2,2,3,${(0.22 + intensidad*0.12).toFixed(3)})`);
-      grad.addColorStop(1, 'rgba(2,2,3,0)');
-      brumaCtx.fillStyle = grad;
-      brumaCtx.beginPath();
-      brumaCtx.arc(hx, hy, radioBlob, 0, Math.PI * 2);
-      brumaCtx.fill();
-    });
+    /* --- masa negra central: ahora es la turbulencia SVG (feTurbulence +
+       feDisplacementMap), el mismo pulso de calma/arranque solo controla
+       su tamaño con un escalado, la textura ya se retuerce sola --- */
+    if(journalBlackGroupEl){
+      const escala = 1 + intensidad * 0.4;
+      journalBlackGroupEl.style.transform = `scale(${escala.toFixed(3)})`;
+    }
 
     brumaAnimId = requestAnimationFrame(animarBruma);
   }
@@ -1113,6 +1140,9 @@
     if(brumaCanvas){
       brumaCanvas.classList.remove('activo');
       if(brumaCtx) brumaCtx.clearRect(0, 0, brumaCanvas.width, brumaCanvas.height);
+    }
+    if(brumaBlackSVG){
+      brumaBlackSVG.classList.remove('activo');
     }
   }
 
@@ -1168,15 +1198,16 @@
     }, 380);
   }
 
-  function abrirLector(){
+  function abrirLector(indiceInicial){
+    const inicio = (typeof indiceInicial === 'number') ? indiceInicial : 0;
     construirGrietas();
     screenIntro.classList.add('fundido');
     screenReader.classList.add('abierto');
     requestAnimationFrame(() => {
       requestAnimationFrame(() => screenReader.classList.add('visible'));
     });
-    indiceActual = 0;
-    pintarEntrada(0);
+    indiceActual = inicio;
+    pintarEntrada(inicio);
   }
 
   function cerrarLector(){
