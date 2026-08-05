@@ -503,16 +503,22 @@
     position:fixed;
     top:50%;
     left:50%;
-    width:min(58vw,58vh);
-    height:min(58vw,58vh);
-    margin-top:calc(min(58vw,58vh) / -2);
-    margin-left:calc(min(58vw,58vh) / -2);
+    width:min(92.8vw,92.8vh);
+    height:min(92.8vw,92.8vh);
+    margin-top:calc(min(92.8vw,92.8vh) / -2);
+    margin-left:calc(min(92.8vw,92.8vh) / -2);
     z-index:2;
     pointer-events:none;
     opacity:0;
+    overflow:visible;
     transition: opacity 1.8s ease;
   }
   #brumaBlackSVG.activo{ opacity:1; }
+
+  #journalBlackGroup{
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+  }
 
   .journal-page.bruma-articulo{
     background: linear-gradient(180deg, rgba(19,20,27,0.55), rgba(4,4,6,0.78));
@@ -531,6 +537,101 @@
 
   .journal-page.bruma-articulo .tachon-trazo{
     stroke: #d7d9e2;
+  }
+
+  /* =========================================================
+     EFECTO AGUA — pagina 4 de agosto: gotas de lluvia sobre
+     la pantalla + petalos de jazmin flotando, con reacciones
+     al llegar el scroll a ciertos puntos del texto
+  ========================================================= */
+  .water-drops, .petalos-jazmin{
+    position:fixed;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+    opacity:0;
+    overflow:hidden;
+    transition: opacity 1.6s ease;
+  }
+  .water-drops.activo, .petalos-jazmin.activo{ opacity:1; }
+  .petalos-jazmin.petalos-ocultos{ opacity:0; transition: opacity 4.2s ease; }
+
+  .gota-corredera{
+    position:absolute;
+    top:-14vh;
+    width:2px;
+    border-radius:2px;
+    background: linear-gradient(180deg,
+      rgba(214,224,236,0) 0%,
+      rgba(214,224,236,.5) 35%,
+      rgba(214,224,236,.85) 65%,
+      rgba(214,224,236,0) 100%);
+    filter: blur(.3px);
+    animation-name: gota-caida;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  @keyframes gota-caida{
+    0%{ transform: translateY(0); opacity:0; }
+    10%{ opacity: var(--gota-op, .55); }
+    82%{ opacity: var(--gota-op, .55); }
+    100%{ transform: translateY(124vh); opacity:0; }
+  }
+  .gota-fija{
+    position:absolute;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%,
+      rgba(255,255,255,.6), rgba(202,216,232,.22) 45%, rgba(202,216,232,0) 76%);
+    animation: gota-brillo 3.8s ease-in-out infinite;
+  }
+  @keyframes gota-brillo{
+    0%,100%{ opacity:.3; }
+    50%{ opacity:.65; }
+  }
+
+  .petalo{
+    position:absolute;
+    top:-9vh;
+    width:11px;
+    height:17px;
+    background: linear-gradient(160deg, #f5eed9, #e6dab6 55%, #cdbc8c);
+    border-radius: 62% 38% 66% 34% / 55% 62% 38% 45%;
+    opacity:0;
+    box-shadow: 0 0 5px rgba(0,0,0,.28);
+    animation-name: petalo-caida;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  @keyframes petalo-caida{
+    0%{ transform: translate(0,0) rotate(0deg); opacity:0; }
+    10%{ opacity:.85; }
+    50%{ transform: translate(var(--deriva, 24px), 55vh) rotate(160deg); }
+    88%{ opacity:.65; }
+    100%{ transform: translate(calc(var(--deriva, 24px) * 2), 118vh) rotate(300deg); opacity:0; }
+  }
+
+  .journal-page.pagina-mojada{
+    box-shadow:
+      0 0 60px rgba(120,150,180,0.14) inset,
+      0 20px 70px rgba(0,0,0,0.6);
+  }
+
+  /* vibracion sutil, en pulsos, no continua */
+  @keyframes vibracion-pulso{
+    0%, 55%, 100%{ transform: translate(0,0); }
+    58%{ transform: translate(-1.4px,1px); }
+    61%{ transform: translate(1.4px,-1px); }
+    64%{ transform: translate(-1px,-1.2px); }
+    67%{ transform: translate(1px,1px); }
+    70%{ transform: translate(-0.6px,0.6px); }
+    73%{ transform: translate(0,0); }
+    5%{ transform: translate(0,0); }
+    8%{ transform: translate(-1px,0.8px); }
+    11%{ transform: translate(1px,-0.8px); }
+    14%{ transform: translate(0,0); }
+  }
+  #screenReader.vibracion-activa{
+    animation: vibracion-pulso 2.8s ease-in-out infinite;
   }
 
 </style>
@@ -571,7 +672,7 @@
   <div id="darkOverlay"></div>
   <svg id="crackOverlay" preserveAspectRatio="none"></svg>
   <canvas id="brumaCanvas"></canvas>
-  <svg id="brumaBlackSVG" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+  <svg id="brumaBlackSVG" viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet">
     <defs>
       <filter id="turbBlackJournal" x="-60%" y="-60%" width="220%" height="220%">
         <feTurbulence type="turbulence" baseFrequency="0.02 0.03" numOctaves="2" seed="19" result="noiseJournal">
@@ -581,12 +682,15 @@
       </filter>
     </defs>
     <g id="journalBlackGroup">
-      <circle id="journalBlackMass" cx="200" cy="200" r="92" fill="#030105" filter="url(#turbBlackJournal)">
+      <circle id="journalBlackMass" cx="320" cy="320" r="92" fill="#030105" filter="url(#turbBlackJournal)">
         <animate attributeName="r" values="92;104;88;98;92" dur="3.6s" repeatCount="indefinite"/>
       </circle>
-      <circle cx="200" cy="200" r="92" fill="none" stroke="#4a0910" stroke-width="0.6" opacity="0.35" filter="url(#turbBlackJournal)"/>
+      <circle cx="320" cy="320" r="92" fill="none" stroke="#4a0910" stroke-width="0.6" opacity="0.35" filter="url(#turbBlackJournal)"/>
     </g>
   </svg>
+
+  <div class="water-drops" id="waterDrops"></div>
+  <div class="petalos-jazmin" id="jazminPetalos"></div>
 
   <span class="page-counter" id="pageCounter"></span>
 
@@ -847,6 +951,37 @@
         "Tal vez es hora de tomar cartas en el asunto.",
         "Si no siento nada desde hace tiempo, tal vez esos gatos sean la única forma de saber si hay algo ahí abajo o si simplemente no queda nada que sentir."
       ]
+    },
+    {
+      fecha: "4 de agosto",
+      especial: "bruma",
+      efectoAgua: true,
+      parrafos: [
+        "Anoche no pasó. Juro que intenté. Quise, intenté con todas mis fuerzas sentir algo. No pude.",
+        "En eso estaba cuando mi compañera usual apareció, también con el mismo interrogante. ¿Cómo hacen dos personas que no sienten para sentir algo? No se puede, le respondí.",
+        "Cuando quise hablar más, simplemente había desaparecido bajo el agua oscura del lago. Como desaparece todo lo que a veces intenta acercarse. Consumido, como todo lo que toco.",
+        "Pude salvarla. Eso creo. ¿Cómo se salva a alguien que no siente?",
+        "No pude dormir después de eso. Pensé que todo había terminado pero escuché una extraña canción que no reconocí a lo lejos. La seguí… ¿Qué más podía hacer? Pero tampoco, ni los pétalos de jazmín que me dieron, ni el té relajante que me regalaron funcionó. A veces uno no tiene sueño y ya.",
+        "No dejo de pensar en el nombre.",
+        "Gregorovitch.",
+        "No lo conozco. Lo repito despacio, para mis adentros, para ver si al decirlo yo mismo se acomoda en algún lado, si encaja con algo, y no encaja con nada. No tengo un solo recuerdo con ese nombre adentro. No está en ningún espejo, no está en nada de lo que Aurelio me hizo repasar. Y sin embargo cuando lo escuché en el bosque algo adentro se movió. No como quien reconoce —como quien es sacudido.",
+        "Los espejos se agitaron.",
+        "No sé cómo explicar esto mejor de lo que ya me lo expliqué a mí mismo, así que lo dejo tal cual me llegó: en el momento exacto en que el bosque dijo ese nombre, sentí que algo dentro de mi cabeza —los espejos, los que uso para guardar y ordenar todo, los que Aurelio me enseñó a levantar hace tantos años que ya ni recuerdo la versión de mí que no los tenía— temblaron. Todos juntos, un instante, como si una piedra hubiera caído en el medio de un cuarto lleno de vidrio colgado del techo.",
+        "Le pregunté a la profesora Black si ella también lo había escuchado. Dijo que no.",
+        "Intenté hacer lo de siempre. Bajar, cerrar los ojos, caminar entre los espejos hasta encontrar alguno que tuviera guardado algo sobre ese nombre —una clase perdida, una conversación de pasillo, algo que hubiera escuchado sin registrar en su momento y que ahora, buscado, apareciera. Es lo que hago siempre que algo no cierra. Bajo y busco.",
+        "Esta vez no encontré espejos. Encontré una masa.",
+        "No sé nombrarla mejor. Es negra, no del negro de una sombra sino del negro de algo que ocupa lugar, que tiene peso, y estaba justo ahí, en el medio del camino que uso siempre para llegar a esa zona de la mente. La empujé —o intenté, con la misma técnica de siempre, la misma presión mental que uso para correr un espejo incómodo hacia un costado— y me empujó de vuelta. No es que no cediera. Es que respondió. Como si tuviera intención.",
+        "No terminé de buscar. No pude.",
+        "Continuamos el camino así, solo respirando, esperando que la masa se corriera sola o que yo encontrara el coraje de volver a empujar, y no pasó ninguna de las dos cosas.",
+        "Ya en el valle escuché una pregunta. ¿Qué heredaría un mago? Y antes de que pudiera pensar nada, antes de decidir si esa pregunta era para mí o simplemente el aire del lugar jugando con el sonido, una respuesta apareció en mi cabeza. No la busqué. No la armé yo. Estaba ahí de golpe, entera, como si alguien la hubiera dejado servida.",
+        "Núcleos de Sangre.",
+        "No sé de dónde salió eso. No sé por qué mi cabeza lo trajo así, tan rápido, tan sin esfuerzo, cuando para cualquier otra cosa tengo que bajar y buscar entre espejos con la masa negra empujándome de vuelta. Esto no lo busqué. Esto vino solo. Y eso me asusta más que la pregunta del valle.",
+        "Vos sos la llave.",
+        "¿Qué llave?",
+        "Lo escribo así, tal cual me quedó dando vueltas toda la noche, porque no tengo mejor forma de decirlo. No entiendo nada. No sé de qué puerta habla, no sé qué es lo que se supone que abro, no sé si soy la llave de algo bueno o de algo que ojalá se hubiera quedado cerrado.",
+        "Lo único que tengo es esto: una pregunta que no elegí escuchar, una respuesta que no elegí pensar, y una frase que no elegí que me dijeran. Nada de esta noche lo elegí yo. Y sin embargo todo pasó adentro mío, o cerca, o a través mío, no sé bien cómo decirlo todavía. Es que por primera vez en años intenté entrar a mi propia cabeza y algo de adentro no me dejó pasar.",
+        "Voy a intentar dormir. No creo que sirva de mucho."
+      ]
     }
   ];
 
@@ -1042,6 +1177,167 @@
   let brumaBlackSVG = null;
   let journalBlackGroupEl = null;
 
+  let mezclaRojo = 0;             // 0 = niebla plateada, 1 = niebla completamente rojiza
+  let intensidadLatido = 1;       // multiplicador del pulso de la masa negra
+  let intensidadLatidoObjetivo = 1;
+
+  /* ---- efecto agua: gotas + petalos de jazmin, con reacciones al scroll ---- */
+  let waterDropsEl = null;
+  let jazminEl = null;
+  let efectoAguaActivo = false;
+  let markerGregorovitch = null;
+  let markerEspejos = null;
+  let markerNucleos = null;
+  let petalosOcultos = false;
+  let vibracionActiva = false;
+  let scrollEfectoRaf = null;
+
+  function generarGotas(){
+    if(!waterDropsEl) return;
+    waterDropsEl.innerHTML = '';
+    const cantidad = 22;
+    for(let n=0; n<cantidad; n++){
+      const gota = document.createElement('div');
+      const esCorredera = n % 3 !== 0;
+      gota.className = esCorredera ? 'gota-corredera' : 'gota-fija';
+      const left = Math.random()*100;
+      gota.style.left = left.toFixed(2) + 'vw';
+      if(esCorredera){
+        const alto = 40 + Math.random()*90;
+        gota.style.height = alto.toFixed(0) + 'px';
+        gota.style.setProperty('--gota-op', (0.3 + Math.random()*0.4).toFixed(2));
+        gota.style.animationDuration = (2.6 + Math.random()*3.4).toFixed(2) + 's';
+        gota.style.animationDelay = (-Math.random()*6).toFixed(2) + 's';
+      } else {
+        const tam = 4 + Math.random()*9;
+        gota.style.width = tam.toFixed(0) + 'px';
+        gota.style.height = tam.toFixed(0) + 'px';
+        gota.style.top = (Math.random()*100).toFixed(2) + 'vh';
+        gota.style.animationDelay = (-Math.random()*3.8).toFixed(2) + 's';
+      }
+      waterDropsEl.appendChild(gota);
+    }
+  }
+
+  function generarPetalos(){
+    if(!jazminEl) return;
+    jazminEl.innerHTML = '';
+    const cantidad = 7;
+    for(let n=0; n<cantidad; n++){
+      const petalo = document.createElement('div');
+      petalo.className = 'petalo';
+      petalo.style.left = (Math.random()*100).toFixed(2) + 'vw';
+      petalo.style.setProperty('--deriva', (18 + Math.random()*46).toFixed(0) + 'px');
+      petalo.style.animationDuration = (9 + Math.random()*7).toFixed(2) + 's';
+      petalo.style.animationDelay = (-Math.random()*12).toFixed(2) + 's';
+      petalo.style.transform = `rotate(${Math.floor(Math.random()*360)}deg)`;
+      jazminEl.appendChild(petalo);
+    }
+  }
+
+  function buscarMarcadoresTexto(){
+    markerGregorovitch = null;
+    markerEspejos = null;
+    markerNucleos = null;
+    entryBodyEl.querySelectorAll('p').forEach(p => {
+      const t = p.textContent.trim();
+      if(!markerGregorovitch && t === 'Gregorovitch.') markerGregorovitch = p;
+      if(!markerEspejos && t === 'Los espejos se agitaron.') markerEspejos = p;
+      if(!markerNucleos && t === 'Núcleos de Sangre.') markerNucleos = p;
+    });
+  }
+
+  function posicionEnPagina(el){
+    if(!el) return 0;
+    const pageRect = journalPage.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    return elRect.top - pageRect.top + journalPage.scrollTop;
+  }
+
+  function evaluarEfectosScroll(){
+    if(!efectoAguaActivo) return;
+    const lineaLectura = journalPage.scrollTop + journalPage.clientHeight * 0.55;
+
+    const pasoGregorovitch = markerGregorovitch ? lineaLectura >= posicionEnPagina(markerGregorovitch) : false;
+    const pasoEspejos = markerEspejos ? lineaLectura >= posicionEnPagina(markerEspejos) : false;
+
+    intensidadLatidoObjetivo = pasoGregorovitch ? 1.9 : 1;
+
+    if(pasoGregorovitch && !petalosOcultos){
+      petalosOcultos = true;
+      if(jazminEl) jazminEl.classList.add('petalos-ocultos');
+    } else if(!pasoGregorovitch && petalosOcultos){
+      petalosOcultos = false;
+      if(jazminEl) jazminEl.classList.remove('petalos-ocultos');
+    }
+
+    if(pasoEspejos && !vibracionActiva){
+      vibracionActiva = true;
+      screenReader.classList.add('vibracion-activa');
+    } else if(!pasoEspejos && vibracionActiva){
+      vibracionActiva = false;
+      screenReader.classList.remove('vibracion-activa');
+    }
+
+    if(pasoEspejos && markerEspejos){
+      const topEspejos = posicionEnPagina(markerEspejos);
+      const topNucleos = markerNucleos ? posicionEnPagina(markerNucleos) : topEspejos + 1;
+      const rango = Math.max(1, topNucleos - topEspejos);
+      const progreso = (lineaLectura - topEspejos) / rango;
+      mezclaRojo = Math.max(0, Math.min(1, progreso));
+    } else {
+      mezclaRojo = 0;
+    }
+  }
+
+  function onScrollEfectoAgua(){
+    if(scrollEfectoRaf) return;
+    scrollEfectoRaf = requestAnimationFrame(() => {
+      scrollEfectoRaf = null;
+      evaluarEfectosScroll();
+    });
+  }
+
+  function activarEfectoAgua(){
+    if(!waterDropsEl) waterDropsEl = document.getElementById('waterDrops');
+    if(!jazminEl) jazminEl = document.getElementById('jazminPetalos');
+
+    efectoAguaActivo = true;
+    petalosOcultos = false;
+    vibracionActiva = false;
+    mezclaRojo = 0;
+    intensidadLatido = 1;
+    intensidadLatidoObjetivo = 1;
+
+    generarGotas();
+    generarPetalos();
+    waterDropsEl.classList.add('activo');
+    jazminEl.classList.remove('petalos-ocultos');
+    jazminEl.classList.add('activo');
+    journalPage.classList.add('pagina-mojada');
+    screenReader.classList.remove('vibracion-activa');
+
+    buscarMarcadoresTexto();
+    journalPage.removeEventListener('scroll', onScrollEfectoAgua);
+    journalPage.addEventListener('scroll', onScrollEfectoAgua);
+    evaluarEfectosScroll();
+  }
+
+  function desactivarEfectoAgua(){
+    efectoAguaActivo = false;
+    if(waterDropsEl) waterDropsEl.classList.remove('activo');
+    if(jazminEl){ jazminEl.classList.remove('activo'); jazminEl.classList.remove('petalos-ocultos'); }
+    journalPage.classList.remove('pagina-mojada');
+    screenReader.classList.remove('vibracion-activa');
+    journalPage.removeEventListener('scroll', onScrollEfectoAgua);
+    mezclaRojo = 0;
+    intensidadLatido = 1;
+    intensidadLatidoObjetivo = 1;
+    markerGregorovitch = null;
+    markerEspejos = null;
+    markerNucleos = null;
+  }
+
   function redimensionarBruma(){
     if(!brumaCanvas) return;
     brumaCanvas.width = window.innerWidth;
@@ -1102,7 +1398,12 @@
     const W = brumaCanvas.width, H = brumaCanvas.height;
     brumaCtx.clearRect(0, 0, W, H);
 
-    /* --- particulas plateadas, cambiando de forma --- */
+    /* --- particulas plateadas (o rojizas, segun mezclaRojo), cambiando de forma --- */
+    const cr = Math.round(228 + (150 - 228) * mezclaRojo);
+    const cg = Math.round(231 + (22 - 231) * mezclaRojo);
+    const cb = Math.round(240 + (26 - 240) * mezclaRojo);
+    const colorMist = `${cr},${cg},${cb}`;
+
     brumaCtx.globalCompositeOperation = 'lighter';
     brumaParticulas.forEach(p => {
       p.x += p.vx;
@@ -1123,9 +1424,9 @@
         const cy = p.y + Math.sin(lob.angulo) * desplazamiento;
         const radioLob = p.r * (0.55 + 0.25 * Math.sin(lob.fase * 1.3));
         const grad = brumaCtx.createRadialGradient(cx, cy, 0, cx, cy, radioLob);
-        grad.addColorStop(0, `rgba(228,231,240,${(opBase*0.8).toFixed(3)})`);
-        grad.addColorStop(0.6, `rgba(228,231,240,${(opBase*0.35).toFixed(3)})`);
-        grad.addColorStop(1, 'rgba(228,231,240,0)');
+        grad.addColorStop(0, `rgba(${colorMist},${(opBase*0.8).toFixed(3)})`);
+        grad.addColorStop(0.6, `rgba(${colorMist},${(opBase*0.35).toFixed(3)})`);
+        grad.addColorStop(1, `rgba(${colorMist},0)`);
         brumaCtx.fillStyle = grad;
         brumaCtx.beginPath();
         brumaCtx.arc(cx, cy, radioLob, 0, Math.PI * 2);
@@ -1133,11 +1434,15 @@
       });
     });
 
-    /* --- pulso: alterna calma y arranques violentos, como un latido --- */
+    /* --- pulso: alterna calma y arranques violentos, como un latido ---
+       intensidadLatido sube (mas fuerte y mas seguido) cuando el scroll
+       de la entrada con efecto agua pasa por "Gregorovitch." --- */
+    intensidadLatido += (intensidadLatidoObjetivo - intensidadLatido) * 0.02;
+
     pulsoProximo--;
     if(pulsoProximo <= 0){
-      pulsoValor = 0.7 + Math.random() * 0.9;
-      pulsoProximo = 50 + Math.random() * 140;
+      pulsoValor = (0.7 + Math.random() * 0.9) * intensidadLatido;
+      pulsoProximo = (50 + Math.random() * 140) / intensidadLatido;
     }
     pulsoValor *= 0.965;
     const intensidad = pulsoValor;
@@ -1146,7 +1451,7 @@
        feDisplacementMap), el mismo pulso de calma/arranque solo controla
        su tamaño con un escalado, la textura ya se retuerce sola --- */
     if(journalBlackGroupEl){
-      const escala = 1 + intensidad * 0.4;
+      const escala = Math.min(1.85, 1 + intensidad * 0.4);
       journalBlackGroupEl.style.transform = `scale(${escala.toFixed(3)})`;
     }
 
@@ -1199,6 +1504,12 @@
       aplicarNivel(entrada.nivel);
     }
 
+    if(entrada.efectoAgua){
+      activarEfectoAgua();
+    } else {
+      desactivarEfectoAgua();
+    }
+
     const textoSpan = navBtn.querySelector('span');
     if(i < entradas.length - 1){
       textoSpan.textContent = 'Ver página siguiente';
@@ -1235,6 +1546,7 @@
     screenReader.classList.remove('visible');
     screenIntro.classList.remove('fundido');
     detenerBruma();
+    desactivarEfectoAgua();
     document.body.classList.remove('bruma-modo');
     screenReader.classList.remove('bruma-activa');
     journalPage.classList.remove('bruma-articulo');
