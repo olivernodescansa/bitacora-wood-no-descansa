@@ -556,20 +556,28 @@
   .water-drops.activo, .petalos-jazmin.activo{ opacity:1; }
   .petalos-jazmin.petalos-ocultos{ opacity:0; transition: opacity 4.2s ease; }
 
+  #waterDrops{
+    --gota-color: 214,224,236;
+    --gota-lentitud: 1;
+    --gota-espesor: 1;
+  }
+
   .gota-corredera{
     position:absolute;
     top:-14vh;
-    width:2px;
+    width: calc(2px * var(--gota-espesor, 1));
     border-radius:2px;
     background: linear-gradient(180deg,
-      rgba(214,224,236,0) 0%,
-      rgba(214,224,236,.5) 35%,
-      rgba(214,224,236,.85) 65%,
-      rgba(214,224,236,0) 100%);
+      rgba(var(--gota-color, 214,224,236),0) 0%,
+      rgba(var(--gota-color, 214,224,236),.5) 35%,
+      rgba(var(--gota-color, 214,224,236),.85) 65%,
+      rgba(var(--gota-color, 214,224,236),0) 100%);
     filter: blur(.3px);
     animation-name: gota-caida;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
+    animation-duration: calc(var(--gota-dur-base, 3.5s) * var(--gota-lentitud, 1));
+    transition: width 1.4s ease;
   }
   @keyframes gota-caida{
     0%{ transform: translateY(0); opacity:0; }
@@ -581,8 +589,11 @@
     position:absolute;
     border-radius:50%;
     background: radial-gradient(circle at 35% 30%,
-      rgba(255,255,255,.6), rgba(202,216,232,.22) 45%, rgba(202,216,232,0) 76%);
-    animation: gota-brillo 3.8s ease-in-out infinite;
+      rgba(255,255,255,.6), rgba(var(--gota-color, 202,216,232),.22) 45%, rgba(var(--gota-color, 202,216,232),0) 76%);
+    animation-name: gota-brillo;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-duration: calc(3.8s * var(--gota-lentitud, 1));
   }
   @keyframes gota-brillo{
     0%,100%{ opacity:.3; }
@@ -1206,7 +1217,7 @@
         const alto = 40 + Math.random()*90;
         gota.style.height = alto.toFixed(0) + 'px';
         gota.style.setProperty('--gota-op', (0.3 + Math.random()*0.4).toFixed(2));
-        gota.style.animationDuration = (2.6 + Math.random()*3.4).toFixed(2) + 's';
+        gota.style.setProperty('--gota-dur-base', (2.6 + Math.random()*3.4).toFixed(2) + 's');
         gota.style.animationDelay = (-Math.random()*6).toFixed(2) + 's';
       } else {
         const tam = 4 + Math.random()*9;
@@ -1287,6 +1298,15 @@
       mezclaRojo = Math.max(0, Math.min(1, progreso));
     } else {
       mezclaRojo = 0;
+    }
+
+    if(waterDropsEl){
+      const gr = Math.round(214 + (132 - 214) * mezclaRojo);
+      const gg = Math.round(224 + (16 - 224) * mezclaRojo);
+      const gb = Math.round(236 + (20 - 236) * mezclaRojo);
+      waterDropsEl.style.setProperty('--gota-color', `${gr},${gg},${gb}`);
+      waterDropsEl.style.setProperty('--gota-lentitud', (1 + mezclaRojo * 1.7).toFixed(2));
+      waterDropsEl.style.setProperty('--gota-espesor', (1 + mezclaRojo * 1.6).toFixed(2));
     }
   }
 
