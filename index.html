@@ -455,6 +455,10 @@
     z-index:5;
     pointer-events:none;
   }
+  /* solo en la pagina vudu: el espejo roto queda detras de la hoja, no encima */
+  #crackOverlay.detras{
+    z-index:1;
+  }
 
   .crack-seg{
     stroke: var(--grieta-plata);
@@ -537,6 +541,106 @@
 
   .journal-page.bruma-articulo .tachon-trazo{
     stroke: #d7d9e2;
+  }
+
+  /* =========================================================
+     MODO VUDÚ — pagina "10 de agosto": fondo plateado liso,
+     masa negra que titila y costuras de muñeco a los costados
+  ========================================================= */
+  body.vudu-modo{
+    background: radial-gradient(ellipse at center, #d7d9e1 0%, #aeb1bd 45%, #75778a 80%, #46485a 100%);
+  }
+
+  #screenReader.vudu-activa{
+    background: radial-gradient(ellipse at center, #d0d2da 0%, #a6a9b6 45%, #6c6e80 80%, #3c3e4e 100%);
+  }
+
+  #vuduBlackSVG{
+    position:fixed;
+    top:50%;
+    left:50%;
+    width:min(66vw,66vh);
+    height:min(66vw,66vh);
+    margin-top:calc(min(66vw,66vh) / -2);
+    margin-left:calc(min(66vw,66vh) / -2);
+    z-index:2;
+    pointer-events:none;
+    opacity:0;
+    overflow:visible;
+    transition: opacity 1.4s ease;
+  }
+  #vuduBlackSVG.activo{
+    opacity:1;
+    animation: vuduTitilar 1.1s steps(1) infinite;
+  }
+
+  @keyframes vuduTitilar{
+    0%{ opacity:1; }
+    6%{ opacity:0.2; }
+    12%{ opacity:0.85; }
+    18%{ opacity:0.1; }
+    26%{ opacity:1; }
+    34%{ opacity:0.35; }
+    40%{ opacity:0.95; }
+    48%{ opacity:0.05; }
+    55%{ opacity:0.8; }
+    63%{ opacity:0.25; }
+    70%{ opacity:1; }
+    78%{ opacity:0.15; }
+    85%{ opacity:0.9; }
+    92%{ opacity:0.3; }
+    100%{ opacity:1; }
+  }
+
+  #vuduBlackGroup{
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+  }
+
+  .journal-page.vudu-articulo{
+    position:relative;
+    background: linear-gradient(180deg, rgba(30,30,36,0.74), rgba(9,9,12,0.87));
+    border-color: rgba(199,203,214,0.24);
+    box-shadow: 0 0 50px rgba(0,0,0,0.5) inset, 0 20px 70px rgba(0,0,0,0.5);
+  }
+
+  .journal-page.vudu-articulo .entry-date{
+    color: #dddee4;
+    text-shadow: 0 0 16px rgba(220,221,227,0.35);
+  }
+
+  .journal-page.vudu-articulo .entry-body p{
+    color: #d7d9e2;
+  }
+
+  .journal-page.vudu-articulo .tachon-trazo{
+    stroke: #d7d9e2;
+  }
+
+  body.vudu-modo .crack-seg{
+    stroke: #eef0f6;
+    filter:
+      drop-shadow(0 0 4px rgba(236,238,244,0.6))
+      drop-shadow(0 0 1px rgba(20,20,26,0.65));
+  }
+  body.vudu-modo .crack-shard{
+    fill: #17181e;
+    stroke: rgba(220,222,230,0.5);
+  }
+
+  /* palabra "Dolió." en la bitacora del 10 de agosto: centrada, grande, como sangre */
+  .entry-body p.dolio-sangre{
+    align-self:center;
+    text-align:center;
+    font-family:'Homemade Apple', cursive;
+    font-size: clamp(2.6rem, 9vw, 5rem);
+    color: #8c0202;
+    text-shadow:
+      0 0 10px rgba(140,2,2,0.75),
+      0 0 22px rgba(90,1,1,0.55),
+      0 2px 0 rgba(0,0,0,0.5);
+    letter-spacing: 0.03em;
+    margin: 0.15em 0;
   }
 
   /* =========================================================
@@ -697,6 +801,24 @@
         <animate attributeName="r" values="92;104;88;98;92" dur="3.6s" repeatCount="indefinite"/>
       </circle>
       <circle cx="320" cy="320" r="92" fill="none" stroke="#4a0910" stroke-width="0.6" opacity="0.35" filter="url(#turbBlackJournal)"/>
+    </g>
+  </svg>
+
+  <svg id="vuduBlackSVG" viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <filter id="turbBlackVudu" x="-90%" y="-90%" width="280%" height="280%">
+        <feTurbulence type="turbulence" baseFrequency="0.035 0.055" numOctaves="3" seed="42" result="noiseVudu">
+          <animate attributeName="baseFrequency" dur="0.32s" values="0.035 0.055;0.1 0.02;0.015 0.09;0.07 0.015;0.04 0.06;0.035 0.055" repeatCount="indefinite"/>
+        </feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noiseVudu" scale="78"/>
+      </filter>
+    </defs>
+    <g id="vuduBlackGroup">
+      <animateTransform attributeName="transform" type="translate" values="0 0; 5 -4; -6 3; 4 5; -4 -5; 3 -3; 0 0" dur="0.5s" repeatCount="indefinite"/>
+      <circle id="vuduBlackMass" cx="320" cy="320" r="88" fill="#020103" filter="url(#turbBlackVudu)">
+        <animate attributeName="r" values="88;126;66;114;80;104;88" dur="1.3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="320" cy="320" r="88" fill="none" stroke="#c7cbd6" stroke-width="0.9" opacity="0.3" filter="url(#turbBlackVudu)"/>
     </g>
   </svg>
 
@@ -993,6 +1115,33 @@
         "Lo único que tengo es esto: una pregunta que no elegí escuchar, una respuesta que no elegí pensar, y una frase que no elegí que me dijeran. Nada de esta noche lo elegí yo. Y sin embargo todo pasó adentro mío, o cerca, o a través mío, no sé bien cómo decirlo todavía. Es que por primera vez en años intenté entrar a mi propia cabeza y algo de adentro no me dejó pasar.",
         "Voy a intentar dormir. No creo que sirva de mucho."
       ]
+    },
+    {
+      fecha: "10 de agosto",
+      especial: "vudu",
+      parrafos: [
+        "No voy a escribir el nombre de la mansión. No voy a escribir qué buscaba ahí ni por qué pensé que podía hacerlo solo, porque ya sé que actué como quien juega de local en campo ajeno sin mirar la formación rival.",
+        "Lo que sí voy a escribir es esto, porque si no lo escribo hoy después lo voy a acomodar en algún espejo prolijo y me va a quedar como si nunca hubiera pasado:",
+        "Dolió.",
+        "No sé cuánto tiempo pasó. Ese es el problema con despertarse de algo que ni siquiera sabías que era un sueño: no hay manera de calcular la cuenta. Un rato antes estaba en un pasillo, o eso creo, con la profesora Black, y después nada, y después el pasto húmedo del lago contra la espalda y el cielo de Hogwarts como si nunca me hubiera ido a ningún lado.",
+        "El cuerpo no me respondía como el mío. Tardé un momento en confiar en que las manos fueran mías otra vez.",
+        "Voy a intentar ordenar esto como ordeno una jugada, por partes, porque si lo dejo todo junto se me mezcla y no quiero que se me mezcle.",
+        "Lo último que tengo antes del vacío es el entrenamiento con la profesora Black y algo que salió mal. Después, nada. Un agujero. Y en ese agujero, ahora lo sé, mi cuerpo estuvo guardado en la Torre de Astronomía.",
+        "Ahí quiero pararme un momento, porque es la parte que más me cuesta escribir. Mi hermana estuvo ahí. Mis amigos estuvieron ahí. Quisieron ayudarme —eso no lo pongo en duda, nunca lo pondría en duda— y para ayudarme confiaron en un auror que decía saber cómo hacerlo. Lo dejaron entrar. Lo dejaron hacerme Legeremancia mientras yo no podía ni abrir los ojos para decir que no.",
+        "No sabían. Eso también lo tengo claro y me lo voy a repetir las veces que haga falta, porque la otra opción es enojarme con la gente que más me quiere por haber confiado en la persona equivocada, y no voy a hacer eso.",
+        "Pero el auror no estaba ahí para ayudar. Estaba terminando un trabajo. Ahora entiendo —o empiezo a entender— que los espejos que se me perdieron estos años, los agujeros que encontraba y no sabía nombrar, eran él. Todo este tiempo. Borrando lo que le convenía que yo no tuviera.",
+        "No sé cuánto. No sé qué. Voy a bajar a buscar, sabiendo de antemano que capaz no hay nada que buscar, que lo que se borra bien borrado a veces no deja ni el hueco. Igual voy a bajar.",
+        "Encontró la masa negra —la misma que llevo meses empujando sin éxito en los espejos— y en vez de preguntarse qué era, pensó en para qué servía. Pensó en núcleos de varita. Pero era más específico que eso. Me quería como arma.",
+        "Otra vez.",
+        "No voy a hacer una lista de todas las veces en mi vida que alguien decidió que yo servía mejor empuñado que escuchado. No tengo el tiempo ni las ganas esta noche. Solo lo anoto, una vez, para que quede: otra vez arma. Como si fuera lo único que la gente sabe hacer conmigo cuando se me acerca lo suficiente.",
+        "Me llevó a una celda. Ahí es donde entra Zahir.",
+        "Pero antes de Zahir hay otra parte que todavía estoy acomodando: alguien escuchó algo mío en el bosque. Y se lo llevó a otra persona, y esa persona hizo un hechizo, y por un tiempo que no sé medir, lo que quedó de mí despierto no estuvo en este cuerpo. Estuvo en un muñeco. No sé describir eso sin que suene ridículo, así que no voy a intentarlo demasiado. Solo voy a decir que hay una diferencia entre saber, en teoría, que la mente y el cuerpo pueden separarse, y despertarte un día entendiendo que a vos te separaron.",
+        "Cuando Zahir entró a esa celda y me sacudió para que despertara, algo se cortó del otro lado. El muñeco, lo que fuera, dejó de servir. Como si al abrir los ojos de este lado, se apagara la luz del otro. No sé si eso tiene sentido para nadie más que para mí.",
+        "No voy a hacer un panegírico. Él se va a reír si lee esto y yo me voy a sentir un idiota. Pero quiero dejarlo anotado, con nombre y apellido, en algún lugar que no sea solo mi cabeza: Zahir Black entró a buscarme sabiendo perfectamente lo que le costaba entrar, y salió arriesgando bastante más de lo que cualquiera arriesgaría por un amigo que ni siquiera juega en su equipo. Me dio el anillo. Me sacó de ahí. Se quedó él, frente a Elean Avery.",
+        "Eso último todavía no lo proceso bien. Se quedó él. No sé nada de él todavía.",
+        "Cuando aparecí, no sé bien dónde, lo primero que hice fue revisar que las manos me respondieran. Las dos. Bien. Después los brazos. Después me reí, solo, en la oscuridad, porque de todas las cosas que podía haber revisado primero, revisé si iba a poder sostener una escoba.",
+        "Mañana no entreno. Mañana busco un mapa de esa celda y busco a mi amigo, y en el medio, cuando tenga un rato, voy a bajar a lo más profundo de mi mente a ver qué me queda de lo que me sacaron."
+      ]
     }
   ];
 
@@ -1186,6 +1335,8 @@
   let pulsoProximo = 0;    // cuadros restantes hasta el siguiente pulso
 
   let brumaBlackSVG = null;
+  let vuduBlackSVG = null;
+  let crackOverlaySVG = null;
   let journalBlackGroupEl = null;
 
   let mezclaRojo = 0;             // 0 = niebla plateada, 1 = niebla completamente rojiza
@@ -1504,23 +1655,56 @@
     entrada.parrafos.forEach(texto => {
       const p = document.createElement('p');
       p.appendChild(construirParrafo(texto));
+      if(entrada.especial === 'vudu' && texto.trim() === 'Dolió.'){
+        p.classList.add('dolio-sangre');
+      }
       entryBodyEl.appendChild(p);
     });
     pageCounter.textContent = `Página ${i+1} de ${entradas.length}`;
+
+    if(!vuduBlackSVG) vuduBlackSVG = document.getElementById('vuduBlackSVG');
+    if(!crackOverlaySVG) crackOverlaySVG = document.getElementById('crackOverlay');
 
     if(entrada.especial === 'bruma'){
       aplicarNivel(0);
       document.querySelectorAll('.crack-seg, .crack-shard').forEach(el => { el.style.opacity = 0; });
       darkOverlay.style.opacity = 0;
+      if(crackOverlaySVG) crackOverlaySVG.classList.remove('detras');
       document.body.classList.add('bruma-modo');
       screenReader.classList.add('bruma-activa');
       journalPage.classList.add('bruma-articulo');
       iniciarBruma();
+      document.body.classList.remove('vudu-modo');
+      screenReader.classList.remove('vudu-activa');
+      journalPage.classList.remove('vudu-articulo');
+      if(vuduBlackSVG) vuduBlackSVG.classList.remove('activo');
+    } else if(entrada.especial === 'vudu'){
+      aplicarNivel(0);
+      darkOverlay.style.opacity = 0;
+      document.querySelectorAll('.crack-seg').forEach(el => { el.style.opacity = 0.85; });
+      document.querySelectorAll('.crack-shard').forEach(el => {
+        const base = parseFloat(el.style.getPropertyValue('--op')) || 0.4;
+        el.style.opacity = Math.min(0.92, base + 0.25).toFixed(2);
+      });
+      if(crackOverlaySVG) crackOverlaySVG.classList.add('detras');
+      detenerBruma();
+      document.body.classList.remove('bruma-modo');
+      screenReader.classList.remove('bruma-activa');
+      journalPage.classList.remove('bruma-articulo');
+      document.body.classList.add('vudu-modo');
+      screenReader.classList.add('vudu-activa');
+      journalPage.classList.add('vudu-articulo');
+      if(vuduBlackSVG) vuduBlackSVG.classList.add('activo');
     } else {
       document.body.classList.remove('bruma-modo');
       screenReader.classList.remove('bruma-activa');
       journalPage.classList.remove('bruma-articulo');
       detenerBruma();
+      document.body.classList.remove('vudu-modo');
+      screenReader.classList.remove('vudu-activa');
+      journalPage.classList.remove('vudu-articulo');
+      if(vuduBlackSVG) vuduBlackSVG.classList.remove('activo');
+      if(crackOverlaySVG) crackOverlaySVG.classList.remove('detras');
       aplicarNivel(entrada.nivel);
     }
 
@@ -1570,6 +1754,11 @@
     document.body.classList.remove('bruma-modo');
     screenReader.classList.remove('bruma-activa');
     journalPage.classList.remove('bruma-articulo');
+    document.body.classList.remove('vudu-modo');
+    screenReader.classList.remove('vudu-activa');
+    journalPage.classList.remove('vudu-articulo');
+    if(vuduBlackSVG) vuduBlackSVG.classList.remove('activo');
+    if(crackOverlaySVG) crackOverlaySVG.classList.remove('detras');
     setTimeout(() => {
       screenReader.classList.remove('abierto');
       indiceActual = 0;
