@@ -644,6 +644,98 @@
   }
 
   /* =========================================================
+     MODO ECLIPSE — nueva entrada: arranca en la misma pagina
+     plateada que el modo vudu, con la masa negra titilando en
+     el centro. A medida que se hace scroll la pantalla entera
+     se tiñe de rojo hasta el eclipse total (a mitad de la
+     pagina) y despues, siguiendo el scroll, vuelve al plateado
+     inicial
+  ========================================================= */
+  body.eclipse-modo{
+    background: radial-gradient(ellipse at center, #d7d9e1 0%, #aeb1bd 45%, #75778a 80%, #46485a 100%);
+  }
+
+  #screenReader.eclipse-activa{
+    background: radial-gradient(ellipse at center, #d0d2da 0%, #a6a9b6 45%, #6c6e80 80%, #3c3e4e 100%);
+  }
+
+  #eclipseRedOverlay{
+    position:fixed;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+    opacity:0;
+    background: radial-gradient(ellipse at center, #1c070a 0%, #0d0408 42%, #050206 75%, #020103 100%);
+  }
+
+  #eclipseBlackSVG{
+    position:fixed;
+    top:50%;
+    left:50%;
+    width:min(70vw,70vh);
+    height:min(70vw,70vh);
+    margin-top:calc(min(70vw,70vh) / -2);
+    margin-left:calc(min(70vw,70vh) / -2);
+    z-index:3;
+    pointer-events:none;
+    opacity:0;
+    overflow:visible;
+    transition: opacity 1.6s ease;
+  }
+  #eclipseBlackSVG.activo{ opacity:1; }
+
+  #eclipseSangreDisc{
+    transition: r 0.4s linear, opacity 0.4s linear;
+  }
+
+  #eclipseBlackGroup{
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    transition: transform 0.4s linear;
+  }
+
+  #eclipseBlackMass{
+    animation: eclipseTitilar 2.6s ease-in-out infinite;
+  }
+
+  @keyframes eclipseTitilar{
+    0%,100%{ opacity:1; }
+    18%{ opacity:0.78; }
+    34%{ opacity:0.95; }
+    50%{ opacity:0.6; }
+    66%{ opacity:0.92; }
+    82%{ opacity:0.7; }
+  }
+
+  .journal-page.eclipse-articulo{
+    --ecl-bg-top: rgba(30,30,36,0.74);
+    --ecl-bg-bottom: rgba(9,9,12,0.87);
+    --ecl-border: rgba(199,203,214,0.24);
+    --ecl-date: #dddee4;
+    --ecl-body: #d7d9e2;
+    --ecl-glow: rgba(220,221,227,0.35);
+    background: linear-gradient(180deg, var(--ecl-bg-top), var(--ecl-bg-bottom));
+    border-color: var(--ecl-border);
+    box-shadow: 0 0 50px rgba(0,0,0,0.6) inset, 0 20px 70px rgba(0,0,0,0.5);
+    transition: background 0.15s linear, border-color 0.15s linear;
+  }
+
+  .journal-page.eclipse-articulo .entry-date{
+    color: var(--ecl-date);
+    text-shadow: 0 0 16px var(--ecl-glow);
+    transition: color 0.15s linear, text-shadow 0.15s linear;
+  }
+
+  .journal-page.eclipse-articulo .entry-body p{
+    color: var(--ecl-body);
+    transition: color 0.15s linear;
+  }
+
+  .journal-page.eclipse-articulo .tachon-trazo{
+    stroke: var(--ecl-body);
+  }
+
+  /* =========================================================
      EFECTO AGUA — pagina 4 de agosto: gotas de lluvia sobre
      la pantalla + petalos de jazmin flotando, con reacciones
      al llegar el scroll a ciertos puntos del texto
@@ -819,6 +911,31 @@
         <animate attributeName="r" values="88;126;66;114;80;104;88" dur="1.3s" repeatCount="indefinite"/>
       </circle>
       <circle cx="320" cy="320" r="88" fill="none" stroke="#c7cbd6" stroke-width="0.9" opacity="0.3" filter="url(#turbBlackVudu)"/>
+    </g>
+  </svg>
+
+  <div id="eclipseRedOverlay"></div>
+  <svg id="eclipseBlackSVG" viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <radialGradient id="eclipseGradSangre" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#e8623f" stop-opacity="0.95"/>
+        <stop offset="35%" stop-color="#af1f1a" stop-opacity="0.75"/>
+        <stop offset="70%" stop-color="#4a0808" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#4a0808" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="turbBlackEclipse" x="-70%" y="-70%" width="240%" height="240%">
+        <feTurbulence type="turbulence" baseFrequency="0.025 0.04" numOctaves="2" seed="77" result="noiseEclipse">
+          <animate attributeName="baseFrequency" dur="0.7s" values="0.025 0.04;0.06 0.015;0.018 0.05;0.025 0.04" repeatCount="indefinite"/>
+        </feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noiseEclipse" scale="52"/>
+      </filter>
+    </defs>
+    <circle id="eclipseSangreDisc" cx="320" cy="320" r="55" fill="url(#eclipseGradSangre)" opacity="0.12"/>
+    <g id="eclipseBlackGroup">
+      <circle id="eclipseBlackMass" cx="320" cy="320" r="90" fill="#030105" filter="url(#turbBlackEclipse)">
+        <animate attributeName="r" values="90;100;84;96;90" dur="4.1s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="320" cy="320" r="90" fill="none" stroke="#7a1018" stroke-width="0.7" opacity="0.4" filter="url(#turbBlackEclipse)"/>
     </g>
   </svg>
 
@@ -1142,6 +1259,29 @@
         "Cuando aparecí, no sé bien dónde, lo primero que hice fue revisar que las manos me respondieran. Las dos. Bien. Después los brazos. Después me reí, solo, en la oscuridad, porque de todas las cosas que podía haber revisado primero, revisé si iba a poder sostener una escoba.",
         "Mañana no entreno. Mañana busco un mapa de esa celda y busco a mi amigo, y en el medio, cuando tenga un rato, voy a bajar a lo más profundo de mi mente a ver qué me queda de lo que me sacaron."
       ]
+    },
+    {
+      fecha: "",
+      especial: "eclipse",
+      parrafos: [
+        "Esta vez ni siquiera me importa fingir que esto es un registro prolijo. No lo es.",
+        "Las heridas que me hicieron en la mansión Malfoy antes de que Zahir me salvara siguen ahí. Aunque diga que no —y eso es lo que hago, a todos les digo que no—. Que estoy bien, que no pasa nada, que solo estoy ofuscado por la organización del torneo de quidditch durante el eclipse de sangre.",
+        "La explicación real es esta: no puedo guardar esto. Llevo años guardando cosas —básicamente toda mi vida desde los siete— y sé exactamente cómo se hace. Se agarra el recuerdo, se lo mira una última vez, se lo mete en un espejo, se sella, y listo: no vuelve a molestar hasta que yo decida abrirlo. Con esto lo intenté. Varias veces. El espejo no cierra. Cada vez que creo que lo logré, al rato está otra vez ahí, filtrándose, como si el vidrio no terminara de asentar nunca. Repito en mi mente, una y otra vez, las noches en que me torturaron.",
+        "No es que esto me duela más que otras cosas que guardé. No es cuestión de intensidad —de eso tengo experiencia de sobra, guardé cosas peores sin que me temblara la mano—. Es que esto, específicamente, se niega a quedarse guardado. Y algo que se repite sin que yo lo llame es lo más parecido a \"sentir\" que me pasa nunca, así que si hoy lo escribo entero no es porque tenga ganas. Es porque no encontré otra forma de que se calle un rato.",
+        "Es el antebrazo. Las heridas que me hicieron cuando me tuvieron cautivo esa semana en la mansión Malfoy, hasta que Zahir me rescató. Es el nervio que me cortaron a propósito, con su cuchillo mortífago y con la calma de alguien que ya lo había hecho antes y sabía exactamente dónde buscar. Nadie gritaba. Nadie apuraba nada. Era trabajo. Yo era trabajo.",
+        "Cosecha, así le llaman ellos a la extracción de los nervios de un mago para usarlos como núcleo de varita. De eso trata el libro que le había robado a la familia Nott, lo que inició todo esto.",
+        "Cuando Zahir me rescató y nos enfrentamos a ellos, robé el cuchillo mortífago para mí, justo antes de tocar el anillo traslador que me devolvió a las afueras de Hogwarts.",
+        "Empecé a sospechar que el recuerdo no cierra porque no lo dejan cerrar. Que las runas del cuchillo no están solo para que la carne no cicatrice. Están, además, para que el espejo tampoco.",
+        "Tiene sentido si lo pienso con la cabeza fría, que es la única forma en que puedo pensar cualquier cosa. Un corte común se cura, y el recuerdo, con tiempo, se guarda como cualquier otro: un espejo sellado y a otra cosa. Pero si algo mantiene la herida abierta indefinidamente, hay una parte de mí que interpreta que el evento todavía no terminó —y yo no sello cosas que todavía están pasando. No puedo. Así funciona la oclumancia, siempre funcionó así, desde la primera vez que aprendí a usarla.",
+        "Y quien me enseñó ese mecanismo, línea por línea, año tras año, fue Aurelio.",
+        "Ahí es donde la teoría deja de ser teoría y empieza a doler distinto —no en el brazo, en otro lado que todavía no sé nombrar bien—. Porque si las runas fueron diseñadas para que la herida no cierre y, como consecuencia, el recuerdo tampoco pueda sellarse, eso no es un efecto secundario afortunado para quien las hizo. Es precisión. Alguien tendría que saber exactamente cómo funciona mi cabeza por dentro, cómo archivo las cosas, qué necesita un recuerdo para poder guardarse, para diseñar algo que apunte específicamente a impedir eso. Y la única persona que tiene ese mapa completo, que se sentó conmigo semana tras semana desde que tenía siete años enseñándome cada rincón del sistema, es él.",
+        "No estoy diciendo que hizo las runas con sus propias manos. Eso todavía no lo sé. Pero sé que dirigió la operación de los Nott —ya lo até la vez pasada— y sé que si alguien del otro lado necesitaba entender cómo garantizar que esto no se me borrara nunca, que quedara ahí, sin sellar, disponible, abierto, el único manual completo de cómo funciona mi mente pasó por sus manos primero. Toda mi infancia con él al lado no fue cuidado. Fue reconocimiento de campo. Y ahora, además, fue el plano con el que alguien construyó algo pensado para que ni siquiera pudiera guardar el dolor de habérmelo hecho.",
+        "Fui a la Cámara de los Secretos con Tabatha. Necesitaba veneno de basilisco, y unos minutos a solas con el cuchillo mientras Tabbs miraba otra cosa. Metí la hoja entera, despacio, en los restos que quedan del basilisco en la cámara, y la dejé ahí el tiempo justo.",
+        "Lo que Tabbie no sabe —lo que no le dije mientras guardaba el cuchillo de nuevo en el arnés, tranquilo, como si acabáramos de resolver un trámite más de la lista— es para qué lo hice en realidad. No fue precaución. No fue \"por las dudas\". Lo impregné porque la próxima vez que me cruce con ese mortífago pienso matarlo con la misma hoja que él usó conmigo. No es un impulso que se me vaya a pasar. Lo pensé con la cabeza fría, la única forma en que pienso cualquier cosa, y decidí que esa hoja iba a estar lista antes de que llegara el momento, no después.",
+        "Lo que no calculé del todo hasta esta noche es lo que eso significa para mí. El veneno vuelve la hoja indestructible, y las runas solo se rompen si el cuchillo se destruye. Elegí un arma para vengarme que, por servir para eso, dejó de poder romperse. Así que el brazo no va a cerrar nunca. Y ahora, gracias a esta teoría de la que no puedo dejar de tirar, tampoco el recuerdo —mientras el cuchillo exista, entero, en algún lado del mundo, esta noche va a seguir sin poder guardarse en ningún espejo, disponible siempre, sin cerrar, esperando.",
+        "Anoche fue el eclipse y, junto con él, el torneo. Qué fácil es que todos crean que soy así: un chico más de Hogwarts, el coordinador de deportes, el ex capitán, el tonto con la escoba que solo habla de eso. Espero que siga así. Las pocas veces que dejo entrar a alguien en mi mente, me lastiman y se van. Estoy harto de esa mierda.",
+        "No sé qué voy a hacer con esto. No tengo una frase final prolija. Solo tengo el espejo sin sellar, otra vez ahí, y la certeza incómoda de que la persona que me enseñó a construir espejos es, probablemente, la misma que se aseguró de que este en particular nunca pudiera cerrarse."
+      ]
     }
   ];
 
@@ -1339,6 +1479,13 @@
   let crackOverlaySVG = null;
   let journalBlackGroupEl = null;
 
+  let eclipseBlackSVG = null;
+  let eclipseSangreDiscEl = null;
+  let eclipseBlackGroupEl = null;
+  let eclipseRedOverlayEl = null;
+  let eclipseActivo = false;
+  let scrollEclipseRaf = null;
+
   let mezclaRojo = 0;             // 0 = niebla plateada, 1 = niebla completamente rojiza
   let intensidadLatido = 1;       // multiplicador del pulso de la masa negra
   let intensidadLatidoObjetivo = 1;
@@ -1507,6 +1654,121 @@
     markerGregorovitch = null;
     markerEspejos = null;
     markerNucleos = null;
+  }
+
+  /* ---- modo eclipse: transicion plateado -> rojo total -> plateado, ligada al scroll de la pagina ----
+     al empezar la pagina (scroll 0) esta en el plateado inicial;
+     a mitad del recorrido de scroll llega al eclipse total (pantalla
+     y tarjeta completamente rojas); y siguiendo el scroll hasta el
+     final vuelve al plateado inicial de la bitacora */
+  function eclLerp(a, b, t){ return a + (b - a) * t; }
+  function eclSmoothstep(t){ t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); }
+
+  // curva del progreso del eclipse en funcion del scroll: solo un tramo breve
+  // plateado al inicio y al final, con rampas suaves hacia/desde un tramo
+  // largo de eclipse total en el medio de la pagina
+  const ECL_BORDE_PLATEADO = 0.06; // 6% del scroll al inicio y al final se queda en plateado
+  const ECL_RAMPA = 0.14;          // 14% del scroll para la transicion hacia/desde el rojo total
+  function progresoEclipse(frac){
+    if(frac <= ECL_BORDE_PLATEADO) return 0;
+    if(frac <= ECL_BORDE_PLATEADO + ECL_RAMPA){
+      return eclSmoothstep((frac - ECL_BORDE_PLATEADO) / ECL_RAMPA);
+    }
+    if(frac >= 1 - ECL_BORDE_PLATEADO) return 0;
+    if(frac >= 1 - ECL_BORDE_PLATEADO - ECL_RAMPA){
+      return eclSmoothstep((1 - ECL_BORDE_PLATEADO - frac) / ECL_RAMPA);
+    }
+    return 1;
+  }
+
+  const eclColorPlateado = { date:[221,222,228], body:[215,217,226], bordeR:199, bordeG:203, bordeB:214, bordeA:0.24, bgTopR:30, bgTopG:30, bgTopB:36, bgTopA:0.74, bgBotR:9, bgBotG:9, bgBotB:12, bgBotA:0.87 };
+  const eclColorRojo     = { date:[217,115,84], body:[236,216,206], bordeR:196, bordeG:66,  bordeB:45,  bordeA:0.32, bgTopR:32,bgTopG:10, bgTopB:12, bgTopA:0.6, bgBotR:6, bgBotG:2,  bgBotB:3, bgBotA:0.82 };
+
+  function evaluarEclipseScroll(){
+    if(!eclipseActivo) return;
+    const recorrible = journalPage.scrollHeight - journalPage.clientHeight;
+    const frac = recorrible > 0 ? Math.min(1, Math.max(0, journalPage.scrollTop / recorrible)) : 0;
+    const progreso = progresoEclipse(frac); // 0 al inicio y al final (plateado), 1 sostenido en el eclipse total
+
+    if(eclipseSangreDiscEl){
+      const radio = 55 + progreso * 190;
+      eclipseSangreDiscEl.setAttribute('r', radio.toFixed(1));
+      eclipseSangreDiscEl.setAttribute('opacity', (0.12 + progreso * 0.85).toFixed(2));
+    }
+    if(eclipseBlackGroupEl){
+      const escala = 1 + progreso * 0.28;
+      eclipseBlackGroupEl.style.transform = `scale(${escala.toFixed(3)})`;
+    }
+    if(eclipseRedOverlayEl){
+      eclipseRedOverlayEl.style.opacity = (progreso * 0.97).toFixed(2);
+    }
+
+    // tarjeta: interpola de plateado a la paleta noche+cobre del eclipse total y de vuelta
+    const dateC = [
+      Math.round(eclLerp(eclColorPlateado.date[0], eclColorRojo.date[0], progreso)),
+      Math.round(eclLerp(eclColorPlateado.date[1], eclColorRojo.date[1], progreso)),
+      Math.round(eclLerp(eclColorPlateado.date[2], eclColorRojo.date[2], progreso))
+    ];
+    const bodyC = [
+      Math.round(eclLerp(eclColorPlateado.body[0], eclColorRojo.body[0], progreso)),
+      Math.round(eclLerp(eclColorPlateado.body[1], eclColorRojo.body[1], progreso)),
+      Math.round(eclLerp(eclColorPlateado.body[2], eclColorRojo.body[2], progreso))
+    ];
+    const bordeR = Math.round(eclLerp(eclColorPlateado.bordeR, eclColorRojo.bordeR, progreso));
+    const bordeG = Math.round(eclLerp(eclColorPlateado.bordeG, eclColorRojo.bordeG, progreso));
+    const bordeB = Math.round(eclLerp(eclColorPlateado.bordeB, eclColorRojo.bordeB, progreso));
+    const bordeOp = eclLerp(eclColorPlateado.bordeA, eclColorRojo.bordeA, progreso).toFixed(2);
+    const bgTopR = Math.round(eclLerp(eclColorPlateado.bgTopR, eclColorRojo.bgTopR, progreso));
+    const bgTopG = Math.round(eclLerp(eclColorPlateado.bgTopG, eclColorRojo.bgTopG, progreso));
+    const bgTopB = Math.round(eclLerp(eclColorPlateado.bgTopB, eclColorRojo.bgTopB, progreso));
+    const bgTopOp = eclLerp(eclColorPlateado.bgTopA, eclColorRojo.bgTopA, progreso).toFixed(2);
+    const bgBotR = Math.round(eclLerp(eclColorPlateado.bgBotR, eclColorRojo.bgBotR, progreso));
+    const bgBotG = Math.round(eclLerp(eclColorPlateado.bgBotG, eclColorRojo.bgBotG, progreso));
+    const bgBotB = Math.round(eclLerp(eclColorPlateado.bgBotB, eclColorRojo.bgBotB, progreso));
+    const bgBotOp = eclLerp(eclColorPlateado.bgBotA, eclColorRojo.bgBotA, progreso).toFixed(2);
+
+    journalPage.style.setProperty('--ecl-date', `rgb(${dateC[0]},${dateC[1]},${dateC[2]})`);
+    journalPage.style.setProperty('--ecl-body', `rgb(${bodyC[0]},${bodyC[1]},${bodyC[2]})`);
+    journalPage.style.setProperty('--ecl-glow', `rgba(${bordeR},${bordeG},${bordeB},${(0.35 + progreso * 0.2).toFixed(2)})`);
+    journalPage.style.setProperty('--ecl-border', `rgba(${bordeR},${bordeG},${bordeB},${bordeOp})`);
+    journalPage.style.setProperty('--ecl-bg-top', `rgba(${bgTopR},${bgTopG},${bgTopB},${bgTopOp})`);
+    journalPage.style.setProperty('--ecl-bg-bottom', `rgba(${bgBotR},${bgBotG},${bgBotB},${bgBotOp})`);
+  }
+
+  function onScrollEclipse(){
+    if(scrollEclipseRaf) return;
+    scrollEclipseRaf = requestAnimationFrame(() => {
+      scrollEclipseRaf = null;
+      evaluarEclipseScroll();
+    });
+  }
+
+  function activarEclipse(){
+    if(!eclipseBlackSVG) eclipseBlackSVG = document.getElementById('eclipseBlackSVG');
+    if(!eclipseSangreDiscEl) eclipseSangreDiscEl = document.getElementById('eclipseSangreDisc');
+    if(!eclipseBlackGroupEl) eclipseBlackGroupEl = document.getElementById('eclipseBlackGroup');
+    if(!eclipseRedOverlayEl) eclipseRedOverlayEl = document.getElementById('eclipseRedOverlay');
+
+    eclipseActivo = true;
+    document.body.classList.add('eclipse-modo');
+    screenReader.classList.add('eclipse-activa');
+    journalPage.classList.add('eclipse-articulo');
+    if(eclipseBlackSVG) eclipseBlackSVG.classList.add('activo');
+
+    journalPage.removeEventListener('scroll', onScrollEclipse);
+    journalPage.addEventListener('scroll', onScrollEclipse);
+    evaluarEclipseScroll();
+  }
+
+  function desactivarEclipse(){
+    eclipseActivo = false;
+    document.body.classList.remove('eclipse-modo');
+    screenReader.classList.remove('eclipse-activa');
+    journalPage.classList.remove('eclipse-articulo');
+    if(eclipseBlackSVG) eclipseBlackSVG.classList.remove('activo');
+    if(eclipseRedOverlayEl) eclipseRedOverlayEl.style.opacity = 0;
+    journalPage.removeEventListener('scroll', onScrollEclipse);
+    ['--ecl-date','--ecl-body','--ecl-glow','--ecl-border','--ecl-bg-top','--ecl-bg-bottom'].forEach(v => journalPage.style.removeProperty(v));
   }
 
   function redimensionarBruma(){
@@ -1678,6 +1940,7 @@
       screenReader.classList.remove('vudu-activa');
       journalPage.classList.remove('vudu-articulo');
       if(vuduBlackSVG) vuduBlackSVG.classList.remove('activo');
+      desactivarEclipse();
     } else if(entrada.especial === 'vudu'){
       aplicarNivel(0);
       darkOverlay.style.opacity = 0;
@@ -1695,6 +1958,21 @@
       screenReader.classList.add('vudu-activa');
       journalPage.classList.add('vudu-articulo');
       if(vuduBlackSVG) vuduBlackSVG.classList.add('activo');
+      desactivarEclipse();
+    } else if(entrada.especial === 'eclipse'){
+      aplicarNivel(0);
+      document.querySelectorAll('.crack-seg, .crack-shard').forEach(el => { el.style.opacity = 0; });
+      darkOverlay.style.opacity = 0;
+      if(crackOverlaySVG) crackOverlaySVG.classList.remove('detras');
+      detenerBruma();
+      document.body.classList.remove('bruma-modo');
+      screenReader.classList.remove('bruma-activa');
+      journalPage.classList.remove('bruma-articulo');
+      document.body.classList.remove('vudu-modo');
+      screenReader.classList.remove('vudu-activa');
+      journalPage.classList.remove('vudu-articulo');
+      if(vuduBlackSVG) vuduBlackSVG.classList.remove('activo');
+      activarEclipse();
     } else {
       document.body.classList.remove('bruma-modo');
       screenReader.classList.remove('bruma-activa');
@@ -1705,6 +1983,7 @@
       journalPage.classList.remove('vudu-articulo');
       if(vuduBlackSVG) vuduBlackSVG.classList.remove('activo');
       if(crackOverlaySVG) crackOverlaySVG.classList.remove('detras');
+      desactivarEclipse();
       aplicarNivel(entrada.nivel);
     }
 
@@ -1759,6 +2038,7 @@
     journalPage.classList.remove('vudu-articulo');
     if(vuduBlackSVG) vuduBlackSVG.classList.remove('activo');
     if(crackOverlaySVG) crackOverlaySVG.classList.remove('detras');
+    desactivarEclipse();
     setTimeout(() => {
       screenReader.classList.remove('abierto');
       indiceActual = 0;
